@@ -1,0 +1,90 @@
+.top {
+  display: flex;
+}
+@media (max-width: 767px) {
+  .top {
+    display: none;
+  }
+}
+.logo {
+  width: 25%;
+}
+@media (max-width: 767px) {
+  .logo {
+    width: 50%;
+  }
+}
+.searchSection {
+  width: 50%;
+  display: flex;
+}
+@media (max-width: 767px) {
+  .searchSection {
+    width: 50%;
+    display: flex;
+  }
+}
+.searchboxanddropdown {
+  display: flex;
+  border-radius: 100px;
+}
+@media (max-width: 767px) {
+  .searchboxanddropdown {
+    display: none;
+  }
+}
+.input {
+  outline: none;
+  border: none;
+  border-top-left-radius: 17.5px;
+  border-bottom-left-radius: 17.5px;
+  height: 35px;
+}
+.SearchIcon_on_small_screen{
+  display: none;
+}
+@media (max-width: 767px) {
+  .SearchIcon_on_small_screen{
+    display: block;
+  }
+}
+.SearchBox_Small_Screen{
+  border-radius: 100px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.last_section{
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 30px;
+}
+@media (max-width: 767px) {
+    .last_section{
+        width: 25%;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+        gap: 6px;
+    }
+  }
+.cart{
+    display: block;
+}
+@media (max-width: 767px) {
+    .cart{
+        display: none;
+    }
+  }
+@media (max-width: 767px) {
+    .Heart{
+        display: none;
+    }
+  }
+@media (min-width: 767px) {
+    .my_Accounts{
+        display: block;
+    }
+  }

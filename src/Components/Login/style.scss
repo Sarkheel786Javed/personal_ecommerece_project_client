@@ -1,0 +1,158 @@
+.body {
+  background: url(/img3.jpg);
+  background-position: start;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh;
+  // filter: brightness(50%);
+  display: flex;
+  justify-content: center;
+  align-items: start;
+}
+.box {
+  padding: 40px;
+  margin-top: 100px;
+  background: rgba(255, 255, 255, 0.275);
+  text-align: center;
+  border-radius: 50px;
+  border-radius: 42px;
+}
+.Auth_active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50px;
+  height: 50px;
+}
+.Active_any {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: black;
+  font-weight: 800;
+  height: 48px;
+  border-radius: 24px;
+  transition: 1s ease-in-out;
+}
+.Login_active {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: black;
+  font-weight: 800;
+  height: 48px;
+  background-color:rgba(255, 255, 255, 0.559);
+  border-radius: 24px;
+  transition: 1s ease-in-out;
+}
+.Signup_active {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: black;
+  font-weight: 800;
+  height: 48px;
+  background-color:rgba(255, 255, 255, 0.559);
+  border-radius: 24px;
+  transition: 1s ease-in-out;
+}
+
+.box .input_Text {
+  border: 0;
+  background: #0a0a0a66;
+  display: block;
+  margin: 20px auto;
+  text-align: center;
+  padding: 10px 10px;
+  width: 250px;
+  outline: none;
+  color: rgb(0, 0, 0);
+  border-radius: 50px;
+  transition: 0.25s;
+}
+
+.box h1 {
+  color: white;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.input_Text,
+.box .input_Text:focus {
+  width: 300px;
+  border-color: white;
+}
+
+.forgot {
+  text-decoration: underline;
+}
+
+ul.social-network {
+  list-style: none;
+  display: inline;
+  margin-left: 0 !important;
+  padding: 0;
+}
+
+ul.social-network li {
+  display: inline;
+  margin: 0 5px;
+}
+
+.social-network a.icoFacebook:hover {
+  background-color: #3b5998;
+}
+
+.social-network a.icoTwitter:hover {
+  background-color: #33ccff;
+}
+
+.social-network a.icoGoogle:hover {
+  background-color: #bd3518;
+}
+
+.social-network a.icoFacebook:hover i,
+.social-network a.icoTwitter:hover i,
+.social-network a.icoGoogle:hover i {
+  color: #fff;
+}
+
+a.socialIcon:hover,
+.socialHoverClass {
+  color: #44bcdd;
+}
+
+.social-circle li a {
+  display: inline-block;
+  position: relative;
+  margin: 0 auto 0 auto;
+  border-radius: 50%;
+  text-align: center;
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+}
+
+.social-circle li i {
+  margin: 0;
+  line-height: 50px;
+  text-align: center;
+}
+
+.social-circle li a:hover i,
+.triggeredHover {
+  transform: rotate(360deg);
+  transition: all 0.2s;
+}
+
+.social-circle i {
+  color: #fff;
+  transition: all 0.8s;
+  transition: all 0.8s;
+}
