@@ -5,8 +5,9 @@ import SignUp from "./Components/Login/SignUp.js";
 import ForgetPassword from "./Components/Login/ForgetPassword.js";
 import Layout from "./app/layout/Layout.js";
 import HomePage from "./Components/HomePage/HomePage.js";
-// import Authorization from './Components/Auth/Auth.js';
+import Authorization from './Components/Auth/Auth.js';
 // import PrivateRoutes from './Components/PrivateRoutes/PrivateRoutes.js';
+import Dashboard from "./Components/Dashboard/Dashboard.js";
 
 function App() {
   return (
@@ -44,9 +45,11 @@ function App() {
             </Layout>
           }
         />
-        {/* <Route path='auth' element={<Authorization />}>
-          <Route path='private-route' element={<PrivateRoutes />} />
-        </Route> */}
+        <Route path='/auth' element={<Authorization />}>
+          {/* <Route path='private' element={<PrivateRoutes />} > */}
+          <Route path='dashboard' element={<Dashboard />} />
+          {/* </Route> */}
+        </Route>
       </Routes>
     </BrowserRouter>
   );

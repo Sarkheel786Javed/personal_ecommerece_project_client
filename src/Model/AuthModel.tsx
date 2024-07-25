@@ -3,6 +3,7 @@ export interface SignupModel {
     email?: String,
     password?: String,
     addressLine1?: String,
+    location?:String,
     phoneNumbber?: String,
     city?:String
     country?:String,

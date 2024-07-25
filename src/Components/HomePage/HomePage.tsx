@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./styles.scss";
 import { Link } from "react-router-dom";
+import Products from "../Products/Products";
+import TopprodectsbyFilter from "../TopProdectsbyFilter/TopprodectsbyFilter";
 function HomePage() {
   const [isDropdownOpen, setDropdownOpen] = useState(true);
 
@@ -133,7 +135,9 @@ function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="d-flex justify-content-end gap-2">
+            
+          </div>
+          <div className="d-flex justify-content-end align-items-center gap-2 position-relative">
               <button
                 className={`carousel-control-prev border border-warning rounded-3 Carousel_Active_Buttons`}
                 type="button"
@@ -157,8 +161,8 @@ function HomePage() {
                 />
               </button>
             </div>
-          </div>
           {/* //////////////////////////header end//////////////////////////////// */}
+          
           <div
             id="carouselExampleCaptions"
             className="carousel slide"
@@ -264,6 +268,8 @@ function HomePage() {
               </div>
             </div>
           </div>
+          <Products/>
+          <TopprodectsbyFilter/>
         </div>
       </div>
     </div>

@@ -114,7 +114,7 @@ function Navbar() {
         <div
           className={`${styles.searchSection} justify-content-between align-items-center`}
         >
-          <div className="fs-2">
+          <div className="cursor-pointer fs-2">
             {showSidebar === false ? (
               <i
                 className="bi bi-list opacity-100"
@@ -282,4 +282,4 @@ function Navbar() {
   );
 }
 
-export de
+export default Navbar;

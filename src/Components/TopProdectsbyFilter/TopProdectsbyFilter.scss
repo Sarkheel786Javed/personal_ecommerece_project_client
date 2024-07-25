@@ -1,0 +1,36 @@
+.card_cover {
+    border-radius: 20px;
+  }
+
+.card_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.card_header .offer_price {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+}
+.cursor_pointer{
+cursor: pointer;
+}
+.card_cover .img_section{
+height: 200px;
+}
+.progress_bar{
+  height: 30px;
+  border-radius: 50px;  
+}
+.progress_bar_inner{
+    height: 28px;
+    border-radius: 50px;
+}
+.offer_timer{
+    height: 50px;
+    width: 50px;
+}
