@@ -5,8 +5,8 @@ import SignUp from "./Components/Login/SignUp.js";
 import ForgetPassword from "./Components/Login/ForgetPassword.js";
 import Layout from "./app/layout/Layout.js";
 import HomePage from "./Components/HomePage/HomePage.js";
-import Authorization from './app/Auth/Auth.js';
-import PrivateRoutes from './app/PrivateRoutes/PrivateRoutes.js';
+import Authorization from "./app/Auth/Auth.js";
+import PrivateRoutes from "./app/PrivateRoutes/PrivateRoutes.js";
 import Dashboard from "./Components/Dashboard/Dashboard.js";
 
 function App() {
@@ -45,10 +45,22 @@ function App() {
             </Layout>
           }
         />
-        <Route path='/auth' element={<Authorization />}>
-          <Route path='private' element={<PrivateRoutes />} >
-          <Route path='dashboard' element={<Dashboard />} />
-          </Route>
+        <Route
+          path="/auth"
+          element={
+            <Authorization>
+              <PrivateRoutes />
+            </Authorization>
+          }
+        >
+          <Route
+            path="dashboard"
+            element={
+              <Authorization>
+                <Dashboard />
+              </Authorization>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>
