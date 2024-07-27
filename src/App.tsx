@@ -5,8 +5,8 @@ import SignUp from "./Components/Login/SignUp.js";
 import ForgetPassword from "./Components/Login/ForgetPassword.js";
 import Layout from "./app/layout/Layout.js";
 import HomePage from "./Components/HomePage/HomePage.js";
-import Authorization from './Components/Auth/Auth';
-import PrivateRoutes from './Components/PrivateRoutes/PrivateRoutes.js';
+import Authorization from './app/Auth/Auth.js';
+import PrivateRoutes from './app/PrivateRoutes/PrivateRoutes.js';
 import Dashboard from "./Components/Dashboard/Dashboard.js";
 
 function App() {

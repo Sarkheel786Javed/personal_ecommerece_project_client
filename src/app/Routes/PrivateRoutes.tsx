@@ -1,7 +1,8 @@
-function PrivateRoutes() {
-  return (
-    <div>PrivateRoutes</div>
-  )
-}
+import Dashboard from "../../Components/Dashboard/Dashboard";
 
-export default PrivateRoutes
+export const PrivateRoute = [
+  {
+    path: "dashboard",
+    Component: <Dashboard />,
+  },
+];

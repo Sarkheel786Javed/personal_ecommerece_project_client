@@ -2,7 +2,7 @@ import "./style.scss";
 import { useLocation, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
-import {AuthService} from "../../Services/AuthServices/AuthServices";
+import { AuthService } from "../../Services/AuthServices/AuthServices";
 import { ForgetModel } from "../../Model/AuthModel";
 import { Link } from "react-router-dom";
 function Login() {
@@ -25,10 +25,10 @@ function Login() {
       toast.onmouseleave = Swal.resumeTimer
     },
   })
-  const onSubmit = async (data: ForgetModel) => {  
+  const onSubmit = async (data: ForgetModel) => {
     try {
       AuthService.Forget(data).then((res) => {
-        
+
         if (res.data.success) {
           Toast.fire({
             showCloseButton: true,
@@ -69,17 +69,15 @@ function Login() {
         <div className="border Auth_active">
           <Link
             to="/login"
-            className={`${
-              location.pathname === "/login" ? "Login_active" : "Active_any"
-            }`}
+            className={`${location.pathname === "/login" ? "Login_active" : "Active_any"
+              }`}
           >
             <div>Login</div>
           </Link>
           <Link
             to="/signup"
-            className={`${
-              location.pathname === "/signup" ? "Signup_active" : "Active_any"
-            }`}
+            className={`${location.pathname === "/signup" ? "Signup_active" : "Active_any"
+              }`}
           >
             <div>Signup</div>
           </Link>
@@ -114,21 +112,21 @@ function Login() {
         <button type="submit" className="mt-3 w-100 btn btn-outline-warning">
           Submit
         </button>
-        <div className="col-md-12">
+        <div className="col-md-12 mt-3">
           <ul className="social-network social-circle">
             <li>
               <Link to="/" className="icoFacebook" title="Facebook">
-                <i className="fab fa-facebook-f"></i>
+                <i className="bi bi-facebook"></i>
               </Link>
             </li>
             <li>
               <Link to="/" className="icoTwitter" title="Twitter">
-                <i className="fab fa-twitter"></i>
+                <i className="bi bi-twitter"></i>
               </Link>
             </li>
             <li>
               <Link to="/" className="icoGoogle" title="Google +">
-                <i className="fab fa-google-plus"></i>
+                <i className="bi bi-google"></i>
               </Link>
             </li>
           </ul>

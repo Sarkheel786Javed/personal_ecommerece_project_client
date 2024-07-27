@@ -135,34 +135,34 @@ function HomePage() {
                 </div>
               </div>
             </div>
-            
+            <div className="w-100 d-flex justify-content-end align-items-center gap-2 ">
+            <button
+              className={`carousel-control-prev border border-warning rounded-3 Carousel_Active_Buttons`}
+              type="button"
+              data-bs-target="#carouselExampleCaptions"
+              data-bs-slide="prev"
+            >
+              <i
+                className="bi bi-chevron-left text-warning fs-3"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              className={`carousel-control-next border border-warning rounded-3 Carousel_Active_Buttons`}
+              type="button"
+              data-bs-target="#carouselExampleCaptions"
+              data-bs-slide="next"
+            >
+              <i
+                className="bi bi-chevron-right text-warning fs-3"
+                aria-hidden="true"
+              />
+            </button>
           </div>
-          
+          </div>
+
           {/* //////////////////////////header end//////////////////////////////// */}
-          <div className="w-25 d-flex justify-content-end align-items-center gap-2 ">
-              <button
-                className={`carousel-control-prev border border-warning rounded-3 Carousel_Active_Buttons`}
-                type="button"
-                data-bs-target="#carouselExampleCaptions"
-                data-bs-slide="prev"
-              >
-                <i
-                  className="bi bi-chevron-left text-warning fs-3"
-                  aria-hidden="true"
-                />
-              </button>
-              <button
-                className={`carousel-control-next border border-warning rounded-3 Carousel_Active_Buttons`}
-                type="button"
-                data-bs-target="#carouselExampleCaptions"
-                data-bs-slide="next"
-              >
-                <i
-                  className="bi bi-chevron-right text-warning fs-3"
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
+          
           <div
             id="carouselExampleCaptions"
             className="carousel slide"
@@ -199,20 +199,16 @@ function HomePage() {
                 />
                 <div className="carousel-caption">
                   <div className="carousel_content">
-                   <div className="carousel_content_text">
-                     <h5>First slide label</h5>
-                    <p>
-                      Some representative placeholder content for the first
-                      slide.
-                    </p>
-                   </div>
+                    <div className="carousel_content_text">
+                      <h5>First slide label</h5>
+                      <p>
+                        Some representative placeholder content for the first
+                        slide.
+                      </p>
+                    </div>
                   </div>
                   <div className={`carousel_inner_img`}>
-                    <img
-                      src="/img3.png"
-                      className={`img`}
-                      alt="..."
-                    />
+                    <img src="/img3.png" className={`img`} alt="..." />
                   </div>
                 </div>
               </div>
@@ -222,22 +218,18 @@ function HomePage() {
                   className={`Carousel_background_img`}
                   alt="..."
                 />
-                 <div className="carousel-caption">
+                <div className="carousel-caption">
                   <div className="carousel_content">
-                   <div className="carousel_content_text">
-                     <h5>Second slide label</h5>
-                    <p>
-                      Some representative placeholder content for the first
-                      slide.
-                    </p>
-                   </div>
+                    <div className="carousel_content_text">
+                      <h5>Second slide label</h5>
+                      <p>
+                        Some representative placeholder content for the first
+                        slide.
+                      </p>
+                    </div>
                   </div>
                   <div className={`carousel_inner_img`}>
-                    <img
-                      src="/img3.png"
-                      className={`img`}
-                      alt="..."
-                    />
+                    <img src="/img3.png" className={`img`} alt="..." />
                   </div>
                 </div>
               </div>
@@ -247,29 +239,25 @@ function HomePage() {
                   className={`Carousel_background_img`}
                   alt="..."
                 />
-                 <div className="carousel-caption">
+                <div className="carousel-caption">
                   <div className="carousel_content">
-                   <div className="carousel_content_text">
-                     <h5>Third slide label</h5>
-                    <p>
-                      Some representative placeholder content for the first
-                      slide.
-                    </p>
-                   </div>
+                    <div className="carousel_content_text">
+                      <h5>Third slide label</h5>
+                      <p>
+                        Some representative placeholder content for the first
+                        slide.
+                      </p>
+                    </div>
                   </div>
                   <div className={`carousel_inner_img`}>
-                    <img
-                      src="/img3.png"
-                      className={`img`}
-                      alt="..."
-                    />
+                    <img src="/img3.png" className={`img`} alt="..." />
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <Products/>
-          <TopprodectsbyFilter/>
+          <Products />
+          <TopprodectsbyFilter />
         </div>
       </div>
     </div>

@@ -27,8 +27,11 @@ function Products() {
     <div className="mt-5">
       <div className="container-fluid">
         <div className="row">
-          {deals.map((data) => (
-            <div className="col-xs-12 col-sm-12 col-md-6 col-lg-3 col-xl-3 col-xxl-3 p-2 cursor-pointer">
+          {deals.map((data, index) => (
+            <div
+              key={index}
+              className="col-xs-12 col-sm-12 col-md-6 col-lg-3 col-xl-3 col-xxl-3 p-2 cursor-pointer"
+            >
               <Link to="/" className="text-decoration-none cursor-pointer">
                 <div className=" deals_container p-2 cursor-pointer">
                   <div className=" imgsection rounded cursor-pointer">

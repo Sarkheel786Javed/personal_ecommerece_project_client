@@ -10,7 +10,7 @@ const AuthService = {
     const res = await axios.post(`${baseUrl}/user/login`, data);
     if (res.data.success) {
       const token = res.data.token;
-      localStorage.setItem('token', token);
+      localStorage.setItem("token", token);
       setLogoutTimer(5 * 60 * 1000); // 5 minutes
     }
     return res;
@@ -19,7 +19,7 @@ const AuthService = {
     return axios.post(`${baseUrl}/user/regenerate-token`, data);
   },
   getToken: (): string | null => {
-    return localStorage.getItem('token');
+    return localStorage.getItem("token");
   },
   logout: () => {
     localStorage.removeItem("token");
@@ -34,9 +34,10 @@ let logoutTimer: NodeJS.Timeout;
 
 const setLogoutTimer = (duration: number) => {
   clearLogoutTimer();
+  console.log("================", duration);
   logoutTimer = setTimeout(() => {
     AuthService.logout();
-    window.location.href = '/login'; // Redirect to login page
+    window.location.href = "/login"; // Redirect to login page
   }, duration);
 };
 

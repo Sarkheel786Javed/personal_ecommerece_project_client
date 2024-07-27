@@ -225,21 +225,21 @@ function SignUp() {
         <button type="submit" className="mt-3 w-100 btn btn-outline-warning">
           Sign up
         </button>
-        <div className="col-md-12">
+        <div className="col-md-12 mt-3">
           <ul className="social-network social-circle">
             <li>
               <Link to="/" className="icoFacebook" title="Facebook">
-                <i className="fab fa-facebook-f"></i>
+                <i className="bi bi-facebook"></i>
               </Link>
             </li>
             <li>
               <Link to="/" className="icoTwitter" title="Twitter">
-                <i className="fab fa-twitter"></i>
+                <i className="bi bi-twitter"></i>
               </Link>
             </li>
             <li>
               <Link to="/" className="icoGoogle" title="Google +">
-                <i className="fab fa-google-plus"></i>
+                <i className="bi bi-google"></i>
               </Link>
             </li>
           </ul>

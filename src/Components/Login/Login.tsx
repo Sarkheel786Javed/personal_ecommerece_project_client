@@ -3,12 +3,13 @@ import "./style.scss";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
-import {AuthService} from "../../Services/AuthServices/AuthServices";
-import { LoginModel } from "../../Model/AuthModel";
+import { AuthService } from "../../Services/AuthServices/AuthServices";
+import { DecodedToken, LoginModel } from "../../Model/AuthModel";
 import { Link } from "react-router-dom";
-// import { useAuth } from "../createContextAuth/createContex";
+import { useAuth } from "../../app/createContextAuth/createContex";
+import { jwtDecode } from "jwt-decode";
 function Login() {
-  // const [auth, setAuth] = useAuth()
+  const [auth, setAuth] = useAuth()
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -38,31 +39,48 @@ function Login() {
   });
   const onSubmit = async (data: LoginModel) => {
     try {
-        const res = await AuthService.Login(data);
-        if (res.data.success) {
-            Toast.fire({
-                showCloseButton: true,
-                icon: "success",
-                title: "Signed in successfully",
-            });
-            // localStorage.setItem('token', res.data.token);
-            // setAuth({ token: res.data.token });
-            navigate("/auth/dashboard");
-        } else {
-            Toast.fire({
-                showCloseButton: true,
-                icon: "error",
-                title: res.data.error,
-            });
-        }
-    } catch (error) {
+      const res = await AuthService.Login(data);
+      if (res.data.success) {
         Toast.fire({
-            showCloseButton: true,
-            icon: "error",
-            title: String(error),
+          showCloseButton: true,
+          icon: "success",
+          title: "Signed in successfully",
         });
+        localStorage.setItem('token', res.data.token);
+        const token = res.data.token;
+        localStorage.setItem('token', token);
+        const decoded: DecodedToken = jwtDecode(token);
+
+        setAuth({
+          token: token,
+          _id: decoded._id,
+          userName: decoded.userName,
+          email: decoded.email,
+          addressLine1: decoded.addressLine1,
+          phoneNumbber: decoded.phoneNumbber,
+          city: decoded.city,
+          country: decoded.country,
+          answer: decoded.answer,
+          Organization: decoded.Organization,
+        });
+        if (auth) {
+          navigate("/auth/private/dashboard");
+        }
+      } else {
+        Toast.fire({
+          showCloseButton: true,
+          icon: "error",
+          title: res.data.error,
+        });
+      }
+    } catch (error) {
+      Toast.fire({
+        showCloseButton: true,
+        icon: "error",
+        title: String(error),
+      });
     }
-};
+  };
   return (
     <div className="body">
       <form
@@ -161,21 +179,21 @@ function Login() {
         >
           Login
         </button>
-        <div className="col-md-12">
+        <div className="col-md-12 mt-3">
           <ul className="social-network social-circle">
             <li>
               <Link to="/" className="icoFacebook" title="Facebook">
-                <i className="fab fa-facebook-f"></i>
+                <i className="bi bi-facebook"></i>
               </Link>
             </li>
             <li>
               <Link to="/" className="icoTwitter" title="Twitter">
-                <i className="fab fa-twitter"></i>
+                <i className="bi bi-twitter"></i>
               </Link>
             </li>
             <li>
               <Link to="/" className="icoGoogle" title="Google +">
-                <i className="fab fa-google-plus"></i>
+                <i className="bi bi-google"></i>
               </Link>
             </li>
           </ul>

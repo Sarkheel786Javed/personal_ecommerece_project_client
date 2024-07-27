@@ -92,8 +92,9 @@ function Navbar() {
         </div>
         <div className="d-flex justify-content-start align-items-center ">
           <div className="d-flex justify-content-start align-items-center gap-3 px-3">
-            {TopLinks.map((item) => (
+            {TopLinks.map((item, index) => (
               <Link
+                key={index}
                 to={item.LinkTo}
                 className="text-decoration-none text-secondary"
               >
