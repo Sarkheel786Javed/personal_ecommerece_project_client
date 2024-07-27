@@ -3,12 +3,12 @@ import "./style.scss";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
-import AuthService from "../../Services/AuthServices/AuthServices";
+import {AuthService} from "../../Services/AuthServices/AuthServices";
 import { LoginModel } from "../../Model/AuthModel";
 import { Link } from "react-router-dom";
-import { useAuth } from "../createContextAuth/createContex";
+// import { useAuth } from "../createContextAuth/createContex";
 function Login() {
-  const [auth, setAuth] = useAuth()
+  // const [auth, setAuth] = useAuth()
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -38,36 +38,31 @@ function Login() {
   });
   const onSubmit = async (data: LoginModel) => {
     try {
-      const res = await AuthService.Login(data);
-      const { token, refreshToken } = res.data;
-
-      if (res.data.success) {
-        Toast.fire({
-          showCloseButton: true,
-          icon: "success",
-          title: "Signed in successfully",
-        });
-
-        localStorage.setItem('accessToken', token);
-        localStorage.setItem('refreshToken', refreshToken);
-
-        setAuth({ token: res.data.token });
-        navigate("/auth/dashboard");
-      } else {
-        Toast.fire({
-          showCloseButton: true,
-          icon: "error",
-          title: res.data.error,
-        });
-      }
+        const res = await AuthService.Login(data);
+        if (res.data.success) {
+            Toast.fire({
+                showCloseButton: true,
+                icon: "success",
+                title: "Signed in successfully",
+            });
+            // localStorage.setItem('token', res.data.token);
+            // setAuth({ token: res.data.token });
+            navigate("/auth/dashboard");
+        } else {
+            Toast.fire({
+                showCloseButton: true,
+                icon: "error",
+                title: res.data.error,
+            });
+        }
     } catch (error) {
-      Toast.fire({
-        showCloseButton: true,
-        icon: "error",
-        title: String(error),
-      });
+        Toast.fire({
+            showCloseButton: true,
+            icon: "error",
+            title: String(error),
+        });
     }
-  };
+};
   return (
     <div className="body">
       <form

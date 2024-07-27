@@ -1,11 +1,14 @@
-import { Outlet } from 'react-router'
+import { Navigate, Outlet } from 'react-router-dom';
+import {AuthService} from '../../Services/AuthServices/AuthServices';
 
-function PrivateRoutes() {
-  return (
-    <>
-      <Outlet />
-    </>
-  )
-}
+const PrivateRoute = () => {
+  const token = AuthService.getToken();
 
-export default PrivateRoutes
+  if (!token) {
+    return <Navigate to="/login" />;
+  }
+
+  return <Outlet />;
+};
+
+export default PrivateRoute;

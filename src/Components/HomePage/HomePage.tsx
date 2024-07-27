@@ -137,7 +137,9 @@ function HomePage() {
             </div>
             
           </div>
-          <div className="d-flex justify-content-end align-items-center gap-2 position-relative">
+          
+          {/* //////////////////////////header end//////////////////////////////// */}
+          <div className="w-25 d-flex justify-content-end align-items-center gap-2 ">
               <button
                 className={`carousel-control-prev border border-warning rounded-3 Carousel_Active_Buttons`}
                 type="button"
@@ -161,8 +163,6 @@ function HomePage() {
                 />
               </button>
             </div>
-          {/* //////////////////////////header end//////////////////////////////// */}
-          
           <div
             id="carouselExampleCaptions"
             className="carousel slide"
