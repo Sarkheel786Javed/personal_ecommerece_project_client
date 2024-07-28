@@ -1,42 +1,92 @@
 import { ReactNode, useEffect, useState } from "react";
 import { AuthService } from "../../Services/AuthServices/AuthServices";
 import { Outlet, useNavigate } from "react-router";
+import { jwtDecode } from "jwt-decode";
 
-// interface jwtDecodeToken {
-//   _id?: string;
-// }
+interface JwtDecodedToken {
+  _id: number;
+  userName: string;
+  updatedAt: string;
+  email: string;
+  addressLine1: string;
+  phoneNumbber: string;
+  city: string;
+  country: string;
+  answer: string;
+  Organization: string;
+}
+
 interface PrivateRoutesProps {
   children: ReactNode;
 }
-const regeneratenAuthToken: React.FC<PrivateRoutesProps> = ({ children }) => {
-  const [isToken, setIstokenExpire] = useState(true);
+
+const RegeneratenAuthToken: React.FC<PrivateRoutesProps> = ({ children }) => {
+  const [isTokenValid, setIsTokenValid] = useState(true);
   const navigate = useNavigate();
+
   useEffect(() => {
-    console.log("1+1");
-    refreshToken();
-  });
-  const refreshToken = async () => {
-    const LocalStorageToken = AuthService.getToken();
-    try {
-      await AuthService.regenerateToken(LocalStorageToken).then((res) => {
-        if (res.data.success === true) {
-          setIstokenExpire(false);
+    const token = localStorage.getItem("token");
+
+    const checkToken = async () => {
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      let decodedToken: JwtDecodedToken;
+      try {
+        decodedToken = jwtDecode<JwtDecodedToken>(token);
+      } catch (err) {
+        console.log("Error decoding token:", err);
+        localStorage.removeItem("token");
+        navigate("/login");
+        return;
+      }
+
+      if (!decodedToken.updatedAt) {
+        localStorage.removeItem("token");
+        navigate("/login");
+        return;
+      }
+
+      const updatedAt = new Date(decodedToken.updatedAt).getTime();
+      const currentTime = Date.now();
+      const durationInMilliseconds = currentTime - updatedAt;
+
+      const durationThreshold = 1 * 60 * 1000; // 1 minute in milliseconds
+
+      if (durationInMilliseconds > durationThreshold) {
+        try {
+          const res = await AuthService.regenerateToken(token);
+          if (res.data.success === true) {
+            setIsTokenValid(true);
+            localStorage.setItem("token", res.data.token);
+          } else {
+            localStorage.removeItem("token");
+            navigate("/login");
+          }
+        } catch (err) {
+          console.log("Error refreshing token:", err);
+          localStorage.removeItem("token");
           navigate("/login");
         }
-      });
+      } else {
+        setIsTokenValid(true);
+      }
+    };
 
-      // await axiosInstance.get(`/user/getUser/${userId}`).then((res)=>{
-      // setLogoutTimer(5 * 60 * 1000); // Reset logout timer
-      // const decodedToken = jwtDecode<jwtDecodeToken>(token);
-      //    console.log("Decoded Token:", decodedToken);
-      //     const userId = decodedToken?._id;
-      //     console.log("User ID:", userId);
-    } catch (err) {}
-  };
+    checkToken();
+
+    const interval = setInterval(() => {
+      checkToken();
+    }, 60 * 1000); // Check token every 1 minute
+
+    return () => clearInterval(interval);
+  }, [navigate]);
 
   return (
     <div>
-      {isToken === true ? (
+      {isTokenValid ? (
         <>
           {children}
           <Outlet />
@@ -56,4 +106,4 @@ const regeneratenAuthToken: React.FC<PrivateRoutesProps> = ({ children }) => {
   );
 };
 
-export default regeneratenAuthToken;
+export default RegeneratenAuthToken;

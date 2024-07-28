@@ -11,40 +11,40 @@ const AuthService = {
     if (res.data.success) {
       const token = res.data.token;
       localStorage.setItem("token", token);
-      setLogoutTimer(5 * 60 * 1000); // 5 minutes
+      // setLogoutTimer(5 * 60 * 1000); // 5 minutes
     }
     return res;
   },
-  regenerateToken: (data: any) => {
-    return axios.post(`${baseUrl}/user/regenerate-token`, data);
+  regenerateToken: (token: any) => {
+    return axios.post(`${baseUrl}/user/regenerate-token/:${token}`);
   },
   getToken: (): string | null => {
     return localStorage.getItem("token");
   },
   logout: () => {
     localStorage.removeItem("token");
-    clearLogoutTimer();
+    // clearLogoutTimer();
   },
   Forget: (data: ForgetModel) => {
     return axios.post(`${baseUrl}/user/forget`, data);
   },
 };
 
-let logoutTimer: NodeJS.Timeout;
+// let logoutTimer: NodeJS.Timeout;
 
-const setLogoutTimer = (duration: number) => {
-  clearLogoutTimer();
-  console.log("================", duration);
-  logoutTimer = setTimeout(() => {
-    AuthService.logout();
-    window.location.href = "/login"; // Redirect to login page
-  }, duration);
-};
+// const setLogoutTimer = (duration: number) => {
+//   clearLogoutTimer();
+//   console.log("================", duration);
+//   logoutTimer = setTimeout(() => {
+//     AuthService.logout();
+//     window.location.href = "/login"; // Redirect to login page
+//   }, duration);
+// };
 
-const clearLogoutTimer = () => {
-  if (logoutTimer) {
-    clearTimeout(logoutTimer);
-  }
-};
+// const clearLogoutTimer = () => {
+//   if (logoutTimer) {
+//     clearTimeout(logoutTimer);
+//   }
+// };
 
-export { AuthService, setLogoutTimer, clearLogoutTimer };
+export { AuthService };
