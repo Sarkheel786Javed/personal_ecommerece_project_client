@@ -15,8 +15,15 @@ const AuthService = {
     }
     return res;
   },
-  regenerateToken: (token: any) => {
-    return axios.post(`${baseUrl}/user/regenerate-token/:${token}`);
+  regenerateToken: (token: string) => {
+    return axios.post(`${baseUrl}/auth/regenerate-token`, { token });
+  },
+  getUser: (userId: any, token: any) => {
+    return axios.get(`${baseUrl}/user/getUser/${userId}/token/${token}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   },
   getToken: (): string | null => {
     return localStorage.getItem("token");

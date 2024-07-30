@@ -6,7 +6,7 @@ import ForgetPassword from "./Components/Login/ForgetPassword.js";
 import Layout from "./app/layout/Layout.js";
 import HomePage from "./Components/HomePage/HomePage.js";
 import Authorization from "./app/Auth/Auth.js";
-import PrivateRoutes from "./app/PrivateRoutes/PrivateRoutes.js";
+import PrivateRoutes from "./app/PrivateRoutes/DashboardWrapper.js";
 import Dashboard from "./Components/Dashboard/Dashboard.js";
 
 function App() {
@@ -45,22 +45,8 @@ function App() {
             </Layout>
           }
         />
-        <Route
-          path="/auth"
-          element={
-            <Authorization>
-              <PrivateRoutes />
-            </Authorization>
-          }
-        >
-          <Route
-            path="dashboard"
-            element={
-              <Authorization>
-                <Dashboard />
-              </Authorization>
-            }
-          />
+        <Route path="/auth" element={ <Authorization><PrivateRoutes /></Authorization>}>
+          <Route path="dashboard" element={<Authorization><Dashboard /></Authorization>}/>
         </Route>
       </Routes>
     </BrowserRouter>

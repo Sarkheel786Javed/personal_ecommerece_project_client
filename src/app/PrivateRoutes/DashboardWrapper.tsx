@@ -1,14 +1,8 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { AuthService } from "../../Services/AuthServices/AuthServices";
+import { Outlet } from "react-router-dom";
 import Sidebar from "../layout/Sidebar/SidebarMain";
 import AdminNavbar from "../layout/Navbar/AdminNavbar";
 
 const PrivateRoute = () => {
-  const token = AuthService.getToken();
-
-  if (!token) {
-    return <Navigate to="/login" />;
-  }
 
   return (
     <div className="d-flex justify-content-start w-100">

@@ -1,6 +1,6 @@
-import { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { AuthService } from "../../Services/AuthServices/AuthServices";
-import { Outlet, useNavigate } from "react-router";
+import { Outlet, useNavigate, useLocation } from "react-router";
 import { jwtDecode } from "jwt-decode";
 
 interface JwtDecodedToken {
@@ -23,84 +23,105 @@ interface PrivateRoutesProps {
 const RegeneratenAuthToken: React.FC<PrivateRoutesProps> = ({ children }) => {
   const [isTokenValid, setIsTokenValid] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  useEffect(() => {
+  const checkToken = async () => {
     const token = localStorage.getItem("token");
 
-    const checkToken = async () => {
-      if (!token) {
-        navigate("/login");
-        return;
-      }
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-      let decodedToken: JwtDecodedToken;
+    let decodedToken: JwtDecodedToken;
+    try {
+      decodedToken = jwtDecode<JwtDecodedToken>(token);
+    } catch (err) {
+      console.log("Error decoding token:", err);
+      localStorage.removeItem("token");
+      navigate("/login");
+      return;
+    }
+
+    if (!decodedToken.updatedAt) {
+      localStorage.removeItem("token");
+      navigate("/login");
+      return;
+    }
+
+    const updatedAt = new Date(decodedToken.updatedAt).getTime();
+    const currentTime = Date.now();
+    const durationInMilliseconds = currentTime - updatedAt;
+
+    const durationThreshold = 1 * 60 * 1000; // 1 minute in milliseconds
+
+    if (durationInMilliseconds > durationThreshold) {
       try {
-        decodedToken = jwtDecode<JwtDecodedToken>(token);
-      } catch (err) {
-        console.log("Error decoding token:", err);
-        localStorage.removeItem("token");
-        navigate("/login");
-        return;
-      }
-
-      if (!decodedToken.updatedAt) {
-        localStorage.removeItem("token");
-        navigate("/login");
-        return;
-      }
-
-      const updatedAt = new Date(decodedToken.updatedAt).getTime();
-      const currentTime = Date.now();
-      const durationInMilliseconds = currentTime - updatedAt;
-
-      const durationThreshold = 1 * 60 * 1000; // 1 minute in milliseconds
-
-      if (durationInMilliseconds > durationThreshold) {
-        try {
-          const res = await AuthService.regenerateToken(token);
-          if (res.data.success === true) {
-            setIsTokenValid(true);
-            localStorage.setItem("token", res.data.token);
-          } else {
-            localStorage.removeItem("token");
-            navigate("/login");
-          }
-        } catch (err) {
-          console.log("Error refreshing token:", err);
+        const res = await AuthService.regenerateToken(token);
+        if (res.data.success === true) {
+          setIsTokenValid(true);
+          localStorage.setItem("token", res.data.token);
+        } else {
           localStorage.removeItem("token");
           navigate("/login");
         }
-      } else {
-        setIsTokenValid(true);
+      } catch (err) {
+        console.log("Error refreshing token:", err);
+        localStorage.removeItem("token");
+        navigate("/login");
       }
-    };
+    } else {
+      setIsTokenValid(true);
+    }
+  };
 
+  const checkUser = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    let decodedToken: JwtDecodedToken;
+    try {
+      decodedToken = jwtDecode<JwtDecodedToken>(token);
+    } catch (err) {
+      console.log("Error decoding token:", err);
+      localStorage.removeItem("token");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await AuthService.getUser(decodedToken._id, token);
+      if (!res.data.success) {
+        localStorage.removeItem("token");
+        navigate("/login");
+        await checkToken(); // Try to refresh the token after logging out
+      }
+    } catch (err) {
+      console.log("Error getting user:", err);
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
+
+  useEffect(() => {
     checkToken();
+  }, []);
 
-    const interval = setInterval(() => {
-      checkToken();
-    }, 60 * 1000); // Check token every 1 minute
-
-    return () => clearInterval(interval);
-  }, [navigate]);
+  useEffect(() => {
+    checkUser();
+  }, [location.pathname]);
 
   return (
     <div>
-      {isTokenValid ? (
+      {isTokenValid && (
         <>
           {children}
           <Outlet />
         </>
-      ) : (
-        <h3
-          className="w-100 d-flex justify-content-center align-items-center fw-bolder"
-          style={{ height: "100vh" }}
-        >
-          Loading...
-          <div className="spinner-border text-warning mx-2" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </h3>
       )}
     </div>
   );
