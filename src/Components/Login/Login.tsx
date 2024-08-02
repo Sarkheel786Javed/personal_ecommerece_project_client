@@ -4,12 +4,12 @@ import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
 import { AuthService } from "../../Services/AuthServices/AuthServices";
-import { DecodedToken, LoginModel } from "../../Model/AuthModel";
+import { DecodedToken, LoginModel } from "../../Model/AuthModel/AuthModel";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../app/createContextAuth/createContex";
 import { jwtDecode } from "jwt-decode";
 function Login() {
-  const [auth, setAuth] = useAuth()
+  const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = React.useState(false);
 

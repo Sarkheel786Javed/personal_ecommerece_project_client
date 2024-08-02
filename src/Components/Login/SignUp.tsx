@@ -2,7 +2,7 @@ import React from "react";
 import "./style.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { SignupModel } from "../../Model/AuthModel";
+import { SignupModel } from "../../Model/AuthModel/AuthModel";
 import {AuthService} from "../../Services/AuthServices/AuthServices";
 import Swal from "sweetalert2";
 function SignUp() {

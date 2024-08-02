@@ -1,27 +1,21 @@
 import axios from "axios";
-import { ForgetModel, LoginModel, SignupModel } from "../../Model/AuthModel";
+import { ForgetModel, LoginModel, SignupModel } from "../../Model/AuthModel/AuthModel";
 
 const baseUrl = "https://my-personal-ecommerece-project.vercel.app/api";
 const AuthService = {
   SignupAuth: (data: SignupModel) => {
     return axios.post(`${baseUrl}/user/signup`, data);
   },
-  Login: async (data: LoginModel) => {
-    const res = await axios.post(`${baseUrl}/user/login`, data);
-    if (res.data.success) {
-      const token = res.data.token;
-      localStorage.setItem("token", token);
-      // setLogoutTimer(5 * 60 * 1000); // 5 minutes
-    }
-    return res;
+  Login:  (data: LoginModel) => {
+    return  axios.post(`${baseUrl}/user/login`, data);
   },
   regenerateToken: (token: string) => {
     return axios.post(`${baseUrl}/user/regenerate-token`, { token });
   },
-  getUser: (userId: any, token: any) => {
-    return axios.get(`${baseUrl}/user/getUser/${userId}/token/${token}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+  getUser: (userId: string, token: string) => {
+    return axios.get(`${baseUrl}/user/user/${userId}`, {
+      headers: { 
+        Authorization: `Bearer ${token}` 
       },
     });
   },
@@ -30,7 +24,6 @@ const AuthService = {
   },
   logout: () => {
     localStorage.removeItem("token");
-    // clearLogoutTimer();
   },
   Forget: (data: ForgetModel) => {
     return axios.post(`${baseUrl}/user/forget`, data);

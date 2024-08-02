@@ -1,0 +1,31 @@
+.images-section {
+  width: 100%;
+  display: flex;
+  justify-content: start;
+  align-items: start;
+}
+.images-section .small_img {
+  width: 70px;
+  padding: 10px;
+}
+.images-section .small_img .inner_img {
+  border: 0px solid ;
+}
+.images-section .small_img .inner_img_hover {
+ border: 1px solid red;
+}
+
+.images-section .delete_img{
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.large_image{
+width: 100%;
+}

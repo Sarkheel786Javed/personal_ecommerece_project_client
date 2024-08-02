@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
 import { AuthService } from "../../Services/AuthServices/AuthServices";
-import { ForgetModel } from "../../Model/AuthModel";
+import { ForgetModel } from "../../Model/AuthModel/AuthModel";
 import { Link } from "react-router-dom";
 function Login() {
   const location = useLocation();

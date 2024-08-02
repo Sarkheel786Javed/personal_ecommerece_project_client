@@ -1,130 +1,66 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { useEffect, useState, ReactNode } from "react";
+import {useNavigate } from "react-router-dom";
 import { AuthService } from "../../Services/AuthServices/AuthServices";
-import { Outlet, useNavigate, useLocation } from "react-router";
 import { jwtDecode } from "jwt-decode";
 
 interface JwtDecodedToken {
-  _id: number;
-  userName: string;
-  updatedAt: string;
-  email: string;
-  addressLine1: string;
-  phoneNumbber: string;
-  city: string;
-  country: string;
-  answer: string;
-  Organization: string;
+  _id: string;
+  updatedAt: number; // Assuming updatedAt is a Unix timestamp in seconds
 }
 
-interface PrivateRoutesProps {
+interface AuthTokenProviderProps {
   children: ReactNode;
 }
 
-const RegeneratenAuthToken: React.FC<PrivateRoutesProps> = ({ children }) => {
-  const [isTokenValid, setIsTokenValid] = useState(true);
+const AuthTokenProvider: React.FC<AuthTokenProviderProps> = ({ children }) => {
+  const [isTokenValid, setIsTokenValid] = useState<boolean>();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const checkToken = async () => {
-    const token = localStorage.getItem("token");
+  useEffect(() => {
+    debugger;
 
+    const getToken = localStorage.getItem("token");
+    const token = getToken ? getToken : "";
     if (!token) {
       navigate("/login");
-      return;
     }
-
-    let decodedToken: JwtDecodedToken;
-    try {
-      decodedToken = jwtDecode<JwtDecodedToken>(token);
-    } catch (err) {
-      console.log("Error decoding token:", err);
-      localStorage.removeItem("token");
-      navigate("/login");
-      return;
-    }
-
-    if (!decodedToken.updatedAt) {
-      localStorage.removeItem("token");
-      navigate("/login");
-      return;
-    }
-
-    const updatedAt = new Date(decodedToken.updatedAt).getTime();
+    const decodedToken = jwtDecode<JwtDecodedToken>(token);
+    const updatedAt = new Date(decodedToken.updatedAt).getTime(); // Parse ISO 8601 string to milliseconds
     const currentTime = Date.now();
     const durationInMilliseconds = currentTime - updatedAt;
-
     const durationThreshold = 1 * 60 * 1000; // 1 minute in milliseconds
 
     if (durationInMilliseconds > durationThreshold) {
-      try {
-        const res = await AuthService.regenerateToken(token);
-        if (res.data.success === true) {
-          setIsTokenValid(true);
-          localStorage.setItem("token", res.data.token);
-        } else {
-          localStorage.removeItem("token");
-          navigate("/login");
-        }
-      } catch (err) {
-        console.log("Error refreshing token:", err);
-        localStorage.removeItem("token");
-        navigate("/login");
-      }
+      getUserAndLogout(decodedToken._id, token);
+      setIsTokenValid(false);
+      getUserAndLogout(decodedToken._id, token);
+      AuthService.logout();
+      navigate("/login");
     } else {
       setIsTokenValid(true);
     }
-  };
-
-  const checkUser = async () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    let decodedToken: JwtDecodedToken;
+  }, [navigate]);
+  const getUserAndLogout = async (userId: string, token: string) => {
     try {
-      decodedToken = jwtDecode<JwtDecodedToken>(token);
-    } catch (err) {
-      console.log("Error decoding token:", err);
+      debugger;
+      await AuthService.getUser(userId, token).then((response) => {
+        if (response.data.success === false) {
+          localStorage.removeItem("token");
+          setIsTokenValid(false);
+          AuthService.logout();
+          navigate("/login");
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching user:", error);
       localStorage.removeItem("token");
-      navigate("/login");
-      return;
-    }
-
-    try {
-      const res = await AuthService.getUser(decodedToken._id, token);
-      if (!res.data.success) {
-        localStorage.removeItem("token");
-        navigate("/login");
-        await checkToken(); // Try to refresh the token after logging out
-      }
-    } catch (err) {
-      console.log("Error getting user:", err);
-      localStorage.removeItem("token");
+      setIsTokenValid(false);
+      AuthService.logout();
       navigate("/login");
     }
   };
 
-  useEffect(() => {
-    checkToken();
-  }, []);
-
-  useEffect(() => {
-    checkUser();
-  }, [location.pathname]);
-
-  return (
-    <div>
-      {isTokenValid && (
-        <>
-          {children}
-          <Outlet />
-        </>
-      )}
-    </div>
-  );
+  return <>{isTokenValid == true && <>{children}</>}</>;
 };
 
-export default RegeneratenAuthToken;
+export default AuthTokenProvider;
