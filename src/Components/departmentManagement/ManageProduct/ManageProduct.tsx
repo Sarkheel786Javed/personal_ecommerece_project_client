@@ -29,19 +29,19 @@ const initialProduct: ProductModel = {
 };
 
 const ManageProduct = () => {
+  const base_URL = "https://my-personal-ecommerece-project.vercel.app/api/";
   const [product, setProduct] = useState<ProductModel>(initialProduct);
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [currentImageIndex, setCurrentImageIndex] = useState<number | null>(
-    null
-  );
+  const [currentImageIndex, setCurrentImageIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const maxFiles = 10;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
     if (name === "images" && files) {
       const fileArray = Array.from(files);
-      if (fileArray.length + product.images!.length > 10) {
-        setErrorMessage("You can only upload up to 10 images.");
+      if (fileArray.length + product.images!.length > maxFiles) {
+        setErrorMessage(`You can only upload up to ${maxFiles} images.`);
         e.target.value = ""; // Clear the input field
         return;
       }
@@ -116,36 +116,37 @@ const ManageProduct = () => {
     // Add your logic to save the product draft here
   };
 
-  const handleAddProduct = async () => {
-    console.log("Adding product:", product);
+  const handleImageUpload = async (images: File[]) => {
+    const formData = new FormData();
+    images.forEach((image) => formData.append("images", image));
 
-    // // Logic to upload images to the public folder
-    const imageUrls: string[] = [];
-    for (const image of product.images!) {
-      const formData = new FormData();
-      formData.append("file", image);
-      try {
-        const response = await axios.post("/upload-image", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        const result = response.data;
-        imageUrls.push(result.filePath); // Store the path returned by the server
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
-    }
-
-    // Update product image URLs
-    const updatedProduct = { ...product, imageUrls, images: [] };
-    // Send the updated product to your MongoDB API
     try {
-      await axios.post("/add-product", updatedProduct);
-      console.log("Product with images:", updatedProduct);
+      const response = await axios.post(
+        `${base_URL}product/upload-images`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      return response.data.imagePaths;
+    } catch (error) {
+      console.error("Error uploading images:", error);
+    }
+  };
+
+  const handleAddProduct = async (product: ProductModel) => {
+    try {
+      const response = await axios.post(`${base_URL}product/add-product`, product);
+      console.log("Product added:", response.data);
     } catch (error) {
       console.error("Error adding product:", error);
     }
+  };
+
+  const handleSubmit = async () => {
+    const imagePaths = await handleImageUpload(product.images!);
+    const updatedProduct = { ...product, imageUrls: imagePaths, images: [] };
+    await handleAddProduct(updatedProduct);
   };
 
   return (
@@ -195,7 +196,7 @@ const ManageProduct = () => {
               )}
               <div className="images-section">
                 <div className="product small_img">
-                  {product.images!.slice(0, 10).map((image, index) => (
+                  {product.images!.slice(0, maxFiles).map((image, index) => (
                     <div
                       key={index}
                       className="position-relative"
@@ -376,7 +377,7 @@ const ManageProduct = () => {
               </button>
               <button
                 className="btn btn-outline-primary"
-                onClick={handleAddProduct}
+                onClick={handleSubmit}
               >
                 Add Product
               </button>
