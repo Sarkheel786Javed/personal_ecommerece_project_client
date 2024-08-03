@@ -14,6 +14,9 @@ const ProductService = {
     addProduct: (data: any) => {
         return axios.post(`${baseUrl}product/add-product`, data);
     },
+    getProduct: () => {
+        return axios.get(`${baseUrl}product/get-product`);
+    },
 };
 
 // let logoutTimer: NodeJS.Timeout;

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./styles.scss";
 import { ProductModel } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
 import {
@@ -176,6 +176,9 @@ const ManageProduct = () => {
     await handleAddProduct(updatedProduct);
   };
   
+useEffect(() => {
+ProductService.getProduct()
+}, [])
 
   return (
     <div className="w-100">
