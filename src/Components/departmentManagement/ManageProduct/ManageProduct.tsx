@@ -9,6 +9,7 @@ import {
   TextField,
 } from "@mui/material";
 import { ProductService } from "../../../Services/ProductServices/ProductServices";
+import axios from "axios";
 
 const initialProduct: ProductModel = {
   productName: "Puffer Jacket With Pocket Detail",
@@ -132,23 +133,33 @@ const ManageProduct = () => {
     // Add your logic to save the product draft here
   };
 
-  const handleImageUpload = async (images: File[]) => {
+  const handleImageUpload = async (images: File[]): Promise<string[]> => {
+    if (!images) {
+      setErrorMessage('Please select files to upload.');
+      return [];
+    }
+  
+    const formData = new FormData();
+    Array.from(images).forEach((file) => {
+      formData.append('images', file);
+    });
+  
     try {
-      if (images.length > maxFiles) {
-        setErrorMessage(`You can only upload up to ${maxFiles} images.`);
-        return;
-      }
-      const formData = new FormData();
-      images.forEach((file) => {
-        formData.append("images", file);
+      const response = await axios.post('http://localhost:7000/api/product/upload-images', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      console.log("formData=====>", formData);
-      const response = await ProductService.uploadImages(formData);
-      return response.data.imagePaths;
+  
+      // Assuming the response contains the image URLs
+      return response.data; // Adjust this according to your backend response
     } catch (error) {
-      console.error("Error uploading images:", error);
+      console.error(error);
+      setErrorMessage('An error occurred while uploading the files.');
+      return [];
     }
   };
+  
 
   const handleAddProduct = async (product: ProductModel) => {
     try {
@@ -160,38 +171,10 @@ const ManageProduct = () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      const formData = new FormData();
-      product.images!.forEach((file, index) => {
-        formData.append(`images[${index}]`, file);
-      });
-  
-      // Add other product fields to formData
-      formData.append("productName", product.productName!);
-      formData.append("description", product.description!);
-      formData.append("size", product.size!);
-      formData.append("gender", product.gender!);
-      formData.append("price", product.price!.toString());
-      formData.append("stock", product.stock!.toString());
-      formData.append("discount", product.discount!.toString());
-      formData.append("discountType", product.discountType!);
-      formData.append("category", product.category!);
-  
-      const response = await ProductService.uploadImages(formData);
-      const imagePaths = response.data.imagePaths; // Assuming response.data.imagePaths is the array of strings
-  
-      const updatedProduct: ProductModel = { 
-        ...product, 
-        imageUrls: imagePaths, // This should be a string array
-        images: [] 
-      };
-      await handleAddProduct(updatedProduct);
-    } catch (error) {
-      console.error("Error submitting product:", error);
-      setErrorMessage("Error submitting product.");
-    }
+    const imagePaths = await handleImageUpload(product.images!);
+    const updatedProduct = { ...product, imageUrls: imagePaths, images: [] };
+    await handleAddProduct(updatedProduct);
   };
-  
   
 
   return (
