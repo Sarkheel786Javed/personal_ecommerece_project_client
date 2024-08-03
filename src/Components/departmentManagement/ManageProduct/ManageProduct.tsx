@@ -31,38 +31,52 @@ const initialProduct: ProductModel = {
 const ManageProduct = () => {
   const base_URL = "https://my-personal-ecommerece-project.vercel.app/api/";
   const [product, setProduct] = useState<ProductModel>(initialProduct);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const maxFiles = 10;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, files } = e.target;
-    if (name === "images" && files) {
-      const fileArray = Array.from(files);
-      if (fileArray.length + product.images!.length > maxFiles) {
+    if (e.target.files) {
+      const newFilesArray = Array.from(e.target.files);
+
+      if (newFilesArray.length + product.images!.length > maxFiles) {
         setErrorMessage(`You can only upload up to ${maxFiles} images.`);
-        e.target.value = ""; // Clear the input field
         return;
       }
-      const singleImg =
-        fileArray.length > 0 ? URL.createObjectURL(fileArray[0]) : "";
-      const singleImgName = fileArray.length > 0 ? fileArray[0].name : "";
       setProduct((prevProduct) => ({
         ...prevProduct,
-        images: [...prevProduct.images!, ...fileArray],
-        singleImg,
-        singleImgName,
+        images: [...prevProduct.images!, ...newFilesArray],
       }));
-      setErrorMessage(""); // Clear any previous error message
-      return;
+      setErrorMessage(null); // Clear any previous error message
+
     }
-    setProduct((prevProduct) => ({ ...prevProduct, [name]: value }));
+
+    // const { name, value, files } = e.target;
+    // if (name === "images" && files) {
+    //   const fileArray = Array.from(files);
+    //   if (fileArray.length + product.images!.length > maxFiles) {
+    //     e.target.value = ""; // Clear the input field
+    //     return;
+    //   }
+    //   const singleImg =
+    //     fileArray.length > 0 ? URL.createObjectURL(fileArray[0]) : "";
+    //   const singleImgName = fileArray.length > 0 ? fileArray[0].name : "";
+    //   setProduct((prevProduct) => ({
+    //     ...prevProduct,
+    //     images: [...prevProduct.images!, ...fileArray],
+    //     singleImg,
+    //     singleImgName,
+    //   }));
+    //   setErrorMessage(""); // Clear any previous error message
+    //   return;
+    // }
+    // setProduct((prevProduct) => ({ ...prevProduct, [name]: value }));
   };
 
   const handleImageDelete = (index: number) => {
     setProduct((prevProduct) => {
-      const updatedImages = prevProduct.images!.filter((_, i) => i !== index);
+      const updatedImages = prevProduct.images!.filter((_: any, i:any) => i !== index);
 
       // Determine the new image to display
       const newIndex =
@@ -117,18 +131,21 @@ const ManageProduct = () => {
   };
 
   const handleImageUpload = async (images: File[]) => {
-    const formData = new FormData();
-    images.forEach((image) => formData.append("images", image));
-
     try {
-      const response = await axios.post(
-        `${base_URL}product/upload-images`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-      return response.data.imagePaths;
+      if (images.length > maxFiles) {
+        setErrorMessage(`You can only upload up to ${maxFiles} images.`);
+        return;
+      }
+      const formData = new FormData();
+      images.forEach((file) => {
+        formData.append('images', file);
+      });
+      console.log("formData=====>",formData)
+      const response = await axios.post(`${base_URL}product/upload-images`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });      return response.data.imagePaths;
     } catch (error) {
       console.error("Error uploading images:", error);
     }
@@ -165,7 +182,12 @@ const ManageProduct = () => {
                 label="Product Name"
                 name="productName"
                 value={product.productName}
-                onChange={handleInputChange}
+                onChange={(e) =>
+                  setProduct((prevProduct) => ({
+                    ...prevProduct,
+                    productName: e.target.value,
+                  }))
+                }
               />
             </div>
             <div className="input-group my-3">
@@ -177,7 +199,12 @@ const ManageProduct = () => {
                 rows={4}
                 name="description"
                 value={product.description}
-                onChange={handleInputChange}
+                onChange={(e) =>
+                  setProduct((prevProduct) => ({
+                    ...prevProduct,
+                    description: e.target.value,
+                  }))
+                }
               />
             </div>
             <div className="w-100 mt-4">
@@ -209,20 +236,18 @@ const ManageProduct = () => {
                       }
                     >
                       <img
-                        className={`rounded my-1 ${
-                          product.hover === index
+                        className={`rounded my-1 ${product.hover === index
                             ? "inner_img_hover"
                             : "inner_img"
-                        } `}
+                          } `}
                         src={URL.createObjectURL(image)}
                         alt={`Product ${index}`}
                         width="100%"
                         style={{ maxHeight: "400px" }}
                       />
                       <div
-                        className={`${
-                          product.hover === index ? "d-flex" : "d-none"
-                        } position-absolute border bg-danger rounded delete_img`}
+                        className={`${product.hover === index ? "d-flex" : "d-none"
+                          } position-absolute border bg-danger rounded delete_img`}
                         onClick={() => handleImageDelete(index)}
                       >
                         X
@@ -257,7 +282,12 @@ const ManageProduct = () => {
                   }}
                   name="size"
                   value={product.size}
-                  onChange={handleInputChange}
+                  onChange={(e) =>
+                    setProduct((prevProduct) => ({
+                      ...prevProduct,
+                      size: e.target.value,
+                    }))
+                  }
                 >
                   <option value="XS">XS</option>
                   <option value="S">S</option>
@@ -277,7 +307,12 @@ const ManageProduct = () => {
                         aria-labelledby="demo-row-radio-buttons-group-label"
                         name="gender"
                         value={product.gender}
-                        onChange={handleInputChange}
+                        onChange={(e) =>
+                          setProduct((prevProduct) => ({
+                            ...prevProduct,
+                            gender: e.target.value,
+                          }))
+                        }
                       >
                         <FormControlLabel
                           value="female"
@@ -312,7 +347,12 @@ const ManageProduct = () => {
                   id="price"
                   name="price"
                   value={product.price}
-                  onChange={handleInputChange}
+                  onChange={(e) =>
+                    setProduct((prevProduct) => ({
+                      ...prevProduct,
+                      price: parseInt(e.target.value),
+                    }))
+                  }
                 />
               </div>
               <div className="input-group my-3">
@@ -323,7 +363,12 @@ const ManageProduct = () => {
                   id="stock"
                   name="stock"
                   value={product.stock}
-                  onChange={handleInputChange}
+                  onChange={(e) =>
+                    setProduct((prevProduct) => ({
+                      ...prevProduct,
+                      stock: parseInt(e.target.value),
+                    }))
+                  }
                 />
               </div>
               <div className="input-group my-3">
@@ -334,7 +379,12 @@ const ManageProduct = () => {
                   id="discount"
                   name="discount"
                   value={product.discount}
-                  onChange={handleInputChange}
+                  onChange={(e) =>
+                    setProduct((prevProduct) => ({
+                      ...prevProduct,
+                      discount: parseInt(e.target.value),
+                    }))
+                  }
                 />
               </div>
               <div className="input-group my-3">
@@ -343,7 +393,12 @@ const ManageProduct = () => {
                   id="discountType"
                   name="discountType"
                   value={product.discountType}
-                  onChange={handleInputChange}
+                  onChange={(e) =>
+                    setProduct((prevProduct) => ({
+                      ...prevProduct,
+                      discountType: e.target.value,
+                    }))
+                  }
                 >
                   <option value="Chinese New Year Discount">
                     Chinese New Year Discount
@@ -362,7 +417,12 @@ const ManageProduct = () => {
                   id="category"
                   name="category"
                   value={product.category}
-                  onChange={handleInputChange}
+                  onChange={(e) =>
+                    setProduct((prevProduct) => ({
+                      ...prevProduct,
+                      category: e.target.value,
+                    }))
+                  }
                 />
               </div>
             </div>

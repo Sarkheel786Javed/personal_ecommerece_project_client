@@ -9,8 +9,8 @@ export interface ProductModel {
   discountType?: string;
   category?: string;
   imageUrls?: string[];
-  images?: File[]; // Use File[] if storing File objects
+  images?: File[];
   singleImg?: string;
   singleImgName?: string;
-  hover?:number
+  hover?: number;
 }
