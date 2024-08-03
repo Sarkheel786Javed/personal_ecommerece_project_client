@@ -3,7 +3,7 @@ import axios from "axios";
 const baseUrl = "https://my-personal-ecommerece-project.vercel.app/api/";
 const ProductService = {
     uploadImages: (data: any) => {
-        return axios.post(`http://localhost:7000/api/product/upload-images`, data, {
+        return axios.post(`${baseUrl}product/upload-images`, data, {
             headers: {
                 "Content-Type": "multipart/form-data",
             },
