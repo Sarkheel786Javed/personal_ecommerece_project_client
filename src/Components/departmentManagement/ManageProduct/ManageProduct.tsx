@@ -160,10 +160,39 @@ const ManageProduct = () => {
   };
 
   const handleSubmit = async () => {
-    const imagePaths = await handleImageUpload(product.images!);
-    const updatedProduct = { ...product, imageUrls: imagePaths, images: [] };
-    await handleAddProduct(updatedProduct);
+    try {
+      const formData = new FormData();
+      product.images!.forEach((file, index) => {
+        formData.append(`images[${index}]`, file);
+      });
+  
+      // Add other product fields to formData
+      formData.append("productName", product.productName!);
+      formData.append("description", product.description!);
+      formData.append("size", product.size!);
+      formData.append("gender", product.gender!);
+      formData.append("price", product.price!.toString());
+      formData.append("stock", product.stock!.toString());
+      formData.append("discount", product.discount!.toString());
+      formData.append("discountType", product.discountType!);
+      formData.append("category", product.category!);
+  
+      const response = await ProductService.uploadImages(formData);
+      const imagePaths = response.data.imagePaths; // Assuming response.data.imagePaths is the array of strings
+  
+      const updatedProduct: ProductModel = { 
+        ...product, 
+        imageUrls: imagePaths, // This should be a string array
+        images: [] 
+      };
+      await handleAddProduct(updatedProduct);
+    } catch (error) {
+      console.error("Error submitting product:", error);
+      setErrorMessage("Error submitting product.");
+    }
   };
+  
+  
 
   return (
     <div className="w-100">
