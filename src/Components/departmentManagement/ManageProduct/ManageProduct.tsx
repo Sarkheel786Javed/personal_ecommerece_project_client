@@ -8,7 +8,7 @@ import {
   RadioGroup,
   TextField,
 } from "@mui/material";
-import axios from "axios";
+import { ProductService } from "../../../Services/ProductServices/ProductServices";
 
 const initialProduct: ProductModel = {
   productName: "Puffer Jacket With Pocket Detail",
@@ -29,10 +29,11 @@ const initialProduct: ProductModel = {
 };
 
 const ManageProduct = () => {
-  const base_URL = "https://my-personal-ecommerece-project.vercel.app/api/";
   const [product, setProduct] = useState<ProductModel>(initialProduct);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState<number | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number | null>(
+    null
+  );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const maxFiles = 10;
 
@@ -49,7 +50,6 @@ const ManageProduct = () => {
         images: [...prevProduct.images!, ...newFilesArray],
       }));
       setErrorMessage(null); // Clear any previous error message
-
     }
 
     // const { name, value, files } = e.target;
@@ -76,7 +76,9 @@ const ManageProduct = () => {
 
   const handleImageDelete = (index: number) => {
     setProduct((prevProduct) => {
-      const updatedImages = prevProduct.images!.filter((_: any, i:any) => i !== index);
+      const updatedImages = prevProduct.images!.filter(
+        (_: any, i: any) => i !== index
+      );
 
       // Determine the new image to display
       const newIndex =
@@ -138,14 +140,11 @@ const ManageProduct = () => {
       }
       const formData = new FormData();
       images.forEach((file) => {
-        formData.append('images', file);
+        formData.append("images", file);
       });
-      console.log("formData=====>",formData)
-      const response = await axios.post(`${base_URL}product/upload-images`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });      return response.data.imagePaths;
+      console.log("formData=====>", formData);
+      const response = await ProductService.uploadImages(formData);
+      return response.data.imagePaths;
     } catch (error) {
       console.error("Error uploading images:", error);
     }
@@ -153,7 +152,7 @@ const ManageProduct = () => {
 
   const handleAddProduct = async (product: ProductModel) => {
     try {
-      const response = await axios.post(`${base_URL}product/add-product`, product);
+      const response = await ProductService.addProduct( product);
       console.log("Product added:", response.data);
     } catch (error) {
       console.error("Error adding product:", error);
@@ -236,18 +235,20 @@ const ManageProduct = () => {
                       }
                     >
                       <img
-                        className={`rounded my-1 ${product.hover === index
+                        className={`rounded my-1 ${
+                          product.hover === index
                             ? "inner_img_hover"
                             : "inner_img"
-                          } `}
+                        } `}
                         src={URL.createObjectURL(image)}
                         alt={`Product ${index}`}
                         width="100%"
                         style={{ maxHeight: "400px" }}
                       />
                       <div
-                        className={`${product.hover === index ? "d-flex" : "d-none"
-                          } position-absolute border bg-danger rounded delete_img`}
+                        className={`${
+                          product.hover === index ? "d-flex" : "d-none"
+                        } position-absolute border bg-danger rounded delete_img`}
                         onClick={() => handleImageDelete(index)}
                       >
                         X
