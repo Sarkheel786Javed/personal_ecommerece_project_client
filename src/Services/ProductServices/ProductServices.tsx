@@ -15,7 +15,7 @@ const ProductService = {
         return axios.post(`${baseUrl}product/add-product`, data);
     },
     getProduct: () => {
-        return axios.get(`${baseUrl}product/get-product`);
+        return axios.get(`${baseUrl}product/get-products`);
     },
 };
 

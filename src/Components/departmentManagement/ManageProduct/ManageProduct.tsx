@@ -135,35 +135,38 @@ const ManageProduct = () => {
 
   const handleImageUpload = async (images: File[]): Promise<string[]> => {
     if (!images) {
-      setErrorMessage('Please select files to upload.');
+      setErrorMessage("Please select files to upload.");
       return [];
     }
-  
+
     const formData = new FormData();
     Array.from(images).forEach((file) => {
-      formData.append('images', file);
+      formData.append("images", file);
     });
-  
+
     try {
-      const response = await axios.post('http://localhost:7000/api/product/upload-images', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-  
+      const response = await axios.post(
+        "http://localhost:7000/api/product/upload-images",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       // Assuming the response contains the image URLs
       return response.data; // Adjust this according to your backend response
     } catch (error) {
       console.error(error);
-      setErrorMessage('An error occurred while uploading the files.');
+      setErrorMessage("An error occurred while uploading the files.");
       return [];
     }
   };
-  
 
   const handleAddProduct = async (product: ProductModel) => {
     try {
-      const response = await ProductService.addProduct( product);
+      const response = await ProductService.addProduct(product);
       console.log("Product added:", response.data);
     } catch (error) {
       console.error("Error adding product:", error);
@@ -175,10 +178,10 @@ const ManageProduct = () => {
     const updatedProduct = { ...product, imageUrls: imagePaths, images: [] };
     await handleAddProduct(updatedProduct);
   };
-  
-useEffect(() => {
-ProductService.getProduct()
-}, [])
+
+  useEffect(() => {
+    ProductService.getProduct();
+  }, []);
 
   return (
     <div className="w-100">
@@ -461,6 +464,7 @@ ProductService.getProduct()
           </div>
         </div>
       </div>
+      {/* //////////  table //////////////// */}
     </div>
   );
 };
