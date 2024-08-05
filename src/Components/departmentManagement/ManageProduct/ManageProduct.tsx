@@ -60,8 +60,8 @@ const ManageProduct = () => {
     //     e.target.value = ""; // Clear the input field
     //     return;
     //   }
-    //   const singleImg =
-    //     fileArray.length > 0 ? URL.createObjectURL(fileArray[0]) : "";
+    // const singleImg =
+    //   fileArray.length > 0 ? URL.createObjectURL(fileArray[0]) : "";
     //   const singleImgName = fileArray.length > 0 ? fileArray[0].name : "";
     //   setProduct((prevProduct) => ({
     //     ...prevProduct,
@@ -138,15 +138,25 @@ const ManageProduct = () => {
       setErrorMessage("Please select files to upload.");
       return [];
     }
+    debugger;
 
     const formData = new FormData();
     Array.from(images).forEach((file) => {
+      formData.append("productName", product.productName);
+      formData.append("category", product.category);
+      formData.append("discountType", product.discountType);
+      formData.append("discount", product.discount.toString());
+      formData.append("stock", product.stock.toString());
+      formData.append("price", product.price.toString());
+      formData.append("gender", product.gender);
+      formData.append("size", product.size);
+      formData.append("description", product.description);
       formData.append("images", file);
     });
 
     try {
       const response = await axios.post(
-        "http://localhost:7000/api/product/upload-images",
+        "http://localhost:7000/api/product/upload",
         formData,
         {
           headers: {
@@ -177,12 +187,17 @@ const ManageProduct = () => {
     const imagePaths = await handleImageUpload(product.images!);
     const updatedProduct = { ...product, imageUrls: imagePaths, images: [] };
     await handleAddProduct(updatedProduct);
+    getData();
   };
-
+  const [showdata, getShowData] = useState<ProductModel[]>([]);
   useEffect(() => {
-    ProductService.getProduct();
+    getData();
   }, []);
-
+  const getData = async () => {
+    await ProductService.getProduct().then((res) => {
+      getShowData(res.data);
+    });
+  };
   return (
     <div className="w-100">
       <h1 className="mx-5 mt-3">Add New Product</h1>
@@ -465,6 +480,31 @@ const ManageProduct = () => {
         </div>
       </div>
       {/* //////////  table //////////////// */}
+      <div className="border">
+        <div className="image_container">
+          {showdata.map((data, index) => (
+            <div key={index} className="border_img border border-2 ">
+              {data.images.map((dat, imgIndex) => (
+                <img
+                  className="rounded_image"
+                  src={`${dat}`}
+                  alt=""
+                  width="50px"
+                  height="50px"
+                  key={imgIndex}
+                  style={{
+                    transform: `rotate(${
+                      imgIndex * (360 / data.images.length)
+                    }deg) translate(100px) rotate(-${
+                      imgIndex * (360 / data.images.length)
+                    }deg)`,
+                  }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
