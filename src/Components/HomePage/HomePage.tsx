@@ -135,7 +135,7 @@ function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="w-100 d-flex justify-content-end align-items-center gap-2 ">
+            {/* <div className="w-100 d-flex justify-content-end align-items-center gap-2 ">
             <button
               className={`carousel-control-prev border border-warning rounded-3 Carousel_Active_Buttons`}
               type="button"
@@ -158,7 +158,7 @@ function HomePage() {
                 aria-hidden="true"
               />
             </button>
-          </div>
+          </div> */}
           </div>
 
           {/* //////////////////////////header end//////////////////////////////// */}
