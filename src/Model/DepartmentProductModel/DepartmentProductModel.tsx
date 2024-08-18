@@ -14,4 +14,6 @@ export interface ProductModel {
   singleImg: string;
   singleImgName: string;
   hover: number;
+  rating:number;
+  onSale:boolean
 }

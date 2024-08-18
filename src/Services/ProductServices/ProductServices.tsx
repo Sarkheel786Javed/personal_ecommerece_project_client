@@ -3,20 +3,12 @@ import axios from "axios";
 // const baseUrl = "https://my-personal-ecommerece-project.vercel.app/api/";
 const baseUrl = "http://localhost:7000/api/";
 const ProductService = {
-    uploadImages: (data: any) => {
-        return axios.post(`${baseUrl}product/upload-images`, data, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
-        });
-    },
-
-    addProduct: (data: any) => {
-        return axios.post(`${baseUrl}product/add-product`, data);
-    },
-    getProduct: () => {
-        return axios.get(`${baseUrl}product/get-products`);
-    },
+  addProduct: (data: any) => {
+    return axios.post(`${baseUrl}product/add-product`, data);
+  },
+  getProduct: () => {
+    return axios.get(`${baseUrl}product/get-products`);
+  },
 };
 
 // let logoutTimer: NodeJS.Timeout;

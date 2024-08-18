@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import "./styles.scss";
 import { ProductModel } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
 import {
@@ -12,21 +13,22 @@ import { ProductService } from "../../../Services/ProductServices/ProductService
 import axios from "axios";
 
 const initialProduct: ProductModel = {
-  productName: "Puffer Jacket With Pocket Detail",
-  description:
-    "Cropped puffer jacket made of technical fabric. High neck and long sleeves. Flap pocket at the chest and in-seam side pockets at the hip. Inside pocket detail. Hem with elastic interior. Zip-up front.",
+  productName: "",
+  description: "",
   size: "M",
   gender: "Unisex",
-  price: 47.55,
-  stock: 77,
-  discount: 10,
+  price: 0,
+  stock: 0,
+  discount: 0,
   discountType: "Chinese New Year Discount",
-  category: "Jacket",
+  category: "",
   imageUrls: [],
   images: [],
   singleImg: "",
   singleImgName: "",
   hover: 0,
+  rating: 0,
+  onSale: false,
 };
 
 const ManageProduct = () => {
@@ -37,6 +39,14 @@ const ManageProduct = () => {
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const maxFiles = 10;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProductModel>({
+    defaultValues: initialProduct,
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -50,29 +60,8 @@ const ManageProduct = () => {
         ...prevProduct,
         images: [...prevProduct.images!, ...newFilesArray],
       }));
-      setErrorMessage(null); // Clear any previous error message
+      setErrorMessage(null);
     }
-
-    // const { name, value, files } = e.target;
-    // if (name === "images" && files) {
-    //   const fileArray = Array.from(files);
-    //   if (fileArray.length + product.images!.length > maxFiles) {
-    //     e.target.value = ""; // Clear the input field
-    //     return;
-    //   }
-    // const singleImg =
-    //   fileArray.length > 0 ? URL.createObjectURL(fileArray[0]) : "";
-    //   const singleImgName = fileArray.length > 0 ? fileArray[0].name : "";
-    //   setProduct((prevProduct) => ({
-    //     ...prevProduct,
-    //     images: [...prevProduct.images!, ...fileArray],
-    //     singleImg,
-    //     singleImgName,
-    //   }));
-    //   setErrorMessage(""); // Clear any previous error message
-    //   return;
-    // }
-    // setProduct((prevProduct) => ({ ...prevProduct, [name]: value }));
   };
 
   const handleImageDelete = (index: number) => {
@@ -81,13 +70,11 @@ const ManageProduct = () => {
         (_: any, i: any) => i !== index
       );
 
-      // Determine the new image to display
       const newIndex =
         currentImageIndex! >= updatedImages.length
           ? updatedImages.length - 1
           : currentImageIndex;
 
-      // Update single image display if needed
       const newSingleImg =
         newIndex != null && updatedImages[newIndex]
           ? URL.createObjectURL(updatedImages[newIndex])
@@ -105,14 +92,12 @@ const ManageProduct = () => {
       };
     });
 
-    // Adjust currentImageIndex if the deleted image was the one being displayed
     setCurrentImageIndex((prevIndex) =>
       prevIndex !== null && prevIndex >= product.images!.length
         ? product.images!.length - 1
         : prevIndex
     );
 
-    // Clear the file input value
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -128,382 +113,252 @@ const ManageProduct = () => {
     setCurrentImageIndex(index);
   };
 
-  const handleSaveDraft = () => {
-    console.log("Saving draft:", product);
-    // Add your logic to save the product draft here
-  };
-
-  const handleImageUpload = async (images: File[]): Promise<string[]> => {
-    if (!images) {
-      setErrorMessage("Please select files to upload.");
-      return [];
-    }
-    debugger;
-
-    const formData = new FormData();
-    Array.from(images).forEach((file) => {
-      formData.append("productName", product.productName);
-      formData.append("category", product.category);
-      formData.append("discountType", product.discountType);
-      formData.append("discount", product.discount.toString());
-      formData.append("stock", product.stock.toString());
-      formData.append("price", product.price.toString());
-      formData.append("gender", product.gender);
-      formData.append("size", product.size);
-      formData.append("description", product.description);
-      formData.append("images", file);
-    });
-
+  const onSubmit: SubmitHandler<ProductModel> = async (data) => {
     try {
-      const response = await axios.post(
-        "http://localhost:7000/api/product/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const formData = new FormData();
 
-      // Assuming the response contains the image URLs
-      return response.data; // Adjust this according to your backend response
-    } catch (error) {
-      console.error(error);
-      setErrorMessage("An error occurred while uploading the files.");
-      return [];
-    }
-  };
+      formData.append("productName", data.productName);
+      formData.append("category", data.category);
+      formData.append("discountType", data.discountType);
+      formData.append("discount", data.discount.toString());
+      formData.append("stock", data.stock.toString());
+      formData.append("price", data.price.toString());
+      formData.append("gender", data.gender);
+      formData.append("size", data.size);
+      formData.append("description", data.description);
 
-  const handleAddProduct = async (product: ProductModel) => {
-    try {
-      const response = await ProductService.addProduct(product);
+      data.images!.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      const response = await ProductService.addProduct(formData)
       console.log("Product added:", response.data);
+      // getData();
     } catch (error) {
       console.error("Error adding product:", error);
+      setErrorMessage("An error occurred while adding the product.");
     }
   };
 
-  const handleSubmit = async () => {
-    const imagePaths = await handleImageUpload(product.images!);
-    const updatedProduct = { ...product, imageUrls: imagePaths, images: [] };
-    await handleAddProduct(updatedProduct);
-    getData();
-  };
-  const [showdata, getShowData] = useState<ProductModel[]>([]);
-  useEffect(() => {
-    getData();
-  }, []);
-  const getData = async () => {
-    await ProductService.getProduct().then((res) => {
-      getShowData(res.data);
-    });
-  };
+  // const [showdata, getShowData] = useState<ProductModel[]>([]);
+  // useEffect(() => {
+  //   getData();
+  // }, []);
+  // const getData = async () => {
+  //   await ProductService.getProduct().then((res) => {
+  //     getShowData(res.data);
+  //   });
+  // };
+
   return (
     <div className="w-100">
       <h1 className="mx-5 mt-3">Add New Product</h1>
       <div className="container">
-        <div className="row border rounded mt-5">
-          <div className="col-12 ">
-            <h2>General Information</h2>
-          </div>
-          <div className="col-xs-12 col-sm-12 col-md-12 col-lg-8 col-xl-8 col-xxl-8">
-            <div className="input-group my-3">
-              <TextField
-                fullWidth
-                id="outlined-error"
-                label="Product Name"
-                name="productName"
-                value={product.productName}
-                onChange={(e) =>
-                  setProduct((prevProduct) => ({
-                    ...prevProduct,
-                    productName: e.target.value,
-                  }))
-                }
-              />
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="row border rounded mt-5">
+            <div className="col-12 ">
+              <h2>General Information</h2>
             </div>
-            <div className="input-group my-3">
-              <TextField
-                id="outlined-multiline-static"
-                fullWidth
-                label="Description"
-                multiline
-                rows={4}
-                name="description"
-                value={product.description}
-                onChange={(e) =>
-                  setProduct((prevProduct) => ({
-                    ...prevProduct,
-                    description: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="w-100 mt-4">
-              <h2>Upload Image</h2>
-              <input
-                className="form-control w-100"
-                type="file"
-                name="images"
-                accept="image/*"
-                multiple
-                ref={fileInputRef}
-                onChange={handleInputChange}
-              />
-              {errorMessage !== "" && (
-                <div className="text-danger">{errorMessage}</div>
-              )}
-              <div className="images-section">
-                <div className="product small_img">
-                  {product.images!.slice(0, maxFiles).map((image, index) => (
-                    <div
-                      key={index}
-                      className="position-relative"
-                      onMouseEnter={() => handelShowLargeImg(image, index)}
-                      onMouseDown={() =>
-                        setProduct((prevProduct) => ({
-                          ...prevProduct,
-                          hover: index,
-                        }))
-                      }
-                    >
-                      <img
-                        className={`rounded my-1 ${
-                          product.hover === index
-                            ? "inner_img_hover"
-                            : "inner_img"
-                        } `}
-                        src={URL.createObjectURL(image)}
-                        alt={`Product ${index}`}
-                        width="100%"
-                        style={{ maxHeight: "400px" }}
-                      />
-                      <div
-                        className={`${
-                          product.hover === index ? "d-flex" : "d-none"
-                        } position-absolute border bg-danger rounded delete_img`}
-                        onClick={() => handleImageDelete(index)}
-                      >
-                        X
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="large_image">
-                  {product.singleImg && (
-                    <>
-                      <p className="text-center">{product.singleImgName}</p>
-                      <img
-                        src={product.singleImg}
-                        alt={`Product`}
-                        width="100%"
-                        style={{ maxHeight: "400px" }}
-                      />
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="section">
-              <div className="w-100 d-flex flex-wrap justify-content-start align-items-start gap-3 my-3">
+            <div className="col-xs-12 col-sm-12 col-md-12 col-lg-8 col-xl-8 col-xxl-8">
+              <div className="input-group my-3">
                 <TextField
-                  id="outlined-select-currency-native"
-                  select
-                  label="Size"
-                  defaultValue="S"
-                  SelectProps={{
-                    native: true,
-                  }}
-                  name="size"
-                  value={product.size}
-                  onChange={(e) =>
-                    setProduct((prevProduct) => ({
-                      ...prevProduct,
-                      size: e.target.value,
-                    }))
-                  }
-                >
-                  <option value="XS">XS</option>
-                  <option value="S">S</option>
-                  <option value="M">M</option>
-                  <option value="XL">XL</option>
-                  <option value="XXL">XXL</option>
-                </TextField>
-                <div className="section">
-                  <h5>Gender</h5>
-                  <div className="d-flex flex-wrap justify-content-start align-items-start gap-3">
-                    <div className="my-2 d-flex flex-wrap justify-content-start align-items-center gap-2">
-                      <FormLabel id="demo-row-radio-buttons-group-label">
-                        Gender
-                      </FormLabel>
-                      <RadioGroup
-                        row
-                        aria-labelledby="demo-row-radio-buttons-group-label"
-                        name="gender"
-                        value={product.gender}
-                        onChange={(e) =>
+                  fullWidth
+                  id="outlined-error"
+                  label="Product Name"
+                  {...register("productName", { required: "Product name is required" })}
+                  error={!!errors.productName}
+                  helperText={errors.productName?.message}
+                />
+              </div>
+              <div className="input-group my-3">
+                <TextField
+                  id="outlined-multiline-static"
+                  fullWidth
+                  label="Description"
+                  multiline
+                  rows={4}
+                  {...register("description", { required: "Description is required" })}
+                  error={!!errors.description}
+                  helperText={errors.description?.message}
+                />
+              </div>
+              <div className="w-100 mt-4">
+                <h2>Upload Image</h2>
+                <input
+                  className="form-control w-100"
+                  type="file"
+                  name="images"
+                  accept="image/*"
+                  multiple
+                  ref={fileInputRef}
+                  onChange={handleInputChange}
+                />
+                {errorMessage && (
+                  <div className="text-danger">{errorMessage}</div>
+                )}
+                <div className="images-section">
+                  <div className="product small_img">
+                    {product.images!.slice(0, maxFiles).map((image, index) => (
+                      <div
+                        key={index}
+                        className="position-relative"
+                        onMouseEnter={() => handelShowLargeImg(image, index)}
+                        onMouseDown={() =>
                           setProduct((prevProduct) => ({
                             ...prevProduct,
-                            gender: e.target.value,
+                            hover: index,
                           }))
                         }
                       >
-                        <FormControlLabel
-                          value="female"
-                          control={<Radio />}
-                          label="Female"
+                        <img
+                          className={`rounded my-1 ${product.hover === index
+                              ? "inner_img_hover"
+                              : "inner_img"
+                            } `}
+                          src={URL.createObjectURL(image)}
+                          alt={`Product ${index}`}
+                          width="100%"
+                          style={{ maxHeight: "400px" }}
                         />
-                        <FormControlLabel
-                          value="male"
-                          control={<Radio />}
-                          label="Male"
+                        <div
+                          className={`${product.hover === index ? "d-flex" : "d-none"
+                            } position-absolute border bg-danger rounded delete_img`}
+                          onClick={() => handleImageDelete(index)}
+                        >
+                          X
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="large_image">
+                    {product.singleImg && (
+                      <>
+                        <p className="text-center">
+                          {product.singleImgName}
+                        </p>
+                        <img
+                          src={product.singleImg}
+                          alt={`Product`}
+                          width="100%"
+                          style={{ maxHeight: "400px" }}
                         />
-                        <FormControlLabel
-                          value="unisex"
-                          control={<Radio />}
-                          label="Unisex"
-                        />
-                      </RadioGroup>
-                    </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
+              <div className="section">
+                <div className="w-100 d-flex flex-wrap justify-content-start align-items-start gap-3 my-3">
+                  <TextField
+                    id="outlined-select-currency-native"
+                    select
+                    label="Size"
+                    {...register("size")}
+                    SelectProps={{
+                      native: true,
+                    }}
+                  >
+                    <option value="XS">XS</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="XL">XL</option>
+                    <option value="XXL">XXL</option>
+                  </TextField>
+                  <div className="section">
+                    <h5>Gender</h5>
+                    <RadioGroup
+                      row
+                      defaultValue="Unisex"
+                      aria-labelledby="demo-radio-buttons-group-label"
+                      {...register("gender")}
+                    >
+                      <FormControlLabel
+                        value="Unisex"
+                        control={<Radio />}
+                        label="Unisex"
+                      />
+                      <FormControlLabel
+                        value="Male"
+                        control={<Radio />}
+                        label="Male"
+                      />
+                      <FormControlLabel
+                        value="Female"
+                        control={<Radio />}
+                        label="Female"
+                      />
+                    </RadioGroup>
+                  </div>
+                </div>
+              </div>
+              <div className="w-100 d-flex flex-wrap justify-content-start align-items-start gap-3 my-3">
+                <TextField
+                  fullWidth
+                  id="outlined-error"
+                  label="Price"
+                  type="number"
+                  {...register("price", {
+                    required: "Price is required",
+                    min: {
+                      value: 0,
+                      message: "Price must be greater than or equal to 0",
+                    },
+                  })}
+                  error={!!errors.price}
+                  helperText={errors.price?.message}
+                />
+                <TextField
+                  fullWidth
+                  id="outlined-error"
+                  label="Stock"
+                  type="number"
+                  {...register("stock", {
+                    required: "Stock is required",
+                    min: {
+                      value: 0,
+                      message: "Stock must be greater than or equal to 0",
+                    },
+                  })}
+                  error={!!errors.stock}
+                  helperText={errors.stock?.message}
+                />
+                <TextField
+                  fullWidth
+                  id="outlined-error"
+                  label="Discount"
+                  type="number"
+                  {...register("discount", {
+                    min: {
+                      value: 0,
+                      message: "Discount must be greater than or equal to 0",
+                    },
+                  })}
+                  error={!!errors.discount}
+                  helperText={errors.discount?.message}
+                />
+              </div>
+              <div className="w-100">
+                <TextField
+                  fullWidth
+                  id="outlined-error"
+                  label="Category"
+                  {...register("category", { required: "Category is required" })}
+                  error={!!errors.category}
+                  helperText={errors.category?.message}
+                />
+              </div>
             </div>
           </div>
-          <div className="col-xs-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4 border rounded">
-            <div className="section">
-              <h2>Pricing And Stock</h2>
-              <div className="input-group my-3">
-                <label htmlFor="price">Base Pricing</label>
-                <input
-                  className="form-control w-100"
-                  type="number"
-                  id="price"
-                  name="price"
-                  value={product.price}
-                  onChange={(e) =>
-                    setProduct((prevProduct) => ({
-                      ...prevProduct,
-                      price: parseInt(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-              <div className="input-group my-3">
-                <label htmlFor="stock">Stock</label>
-                <input
-                  className="form-control w-100"
-                  type="number"
-                  id="stock"
-                  name="stock"
-                  value={product.stock}
-                  onChange={(e) =>
-                    setProduct((prevProduct) => ({
-                      ...prevProduct,
-                      stock: parseInt(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-              <div className="input-group my-3">
-                <label htmlFor="discount">Discount</label>
-                <input
-                  className="form-control w-100"
-                  type="number"
-                  id="discount"
-                  name="discount"
-                  value={product.discount}
-                  onChange={(e) =>
-                    setProduct((prevProduct) => ({
-                      ...prevProduct,
-                      discount: parseInt(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-              <div className="input-group my-3">
-                <label htmlFor="discountType">Discount Type</label>
-                <select
-                  id="discountType"
-                  name="discountType"
-                  value={product.discountType}
-                  onChange={(e) =>
-                    setProduct((prevProduct) => ({
-                      ...prevProduct,
-                      discountType: e.target.value,
-                    }))
-                  }
-                >
-                  <option value="Chinese New Year Discount">
-                    Chinese New Year Discount
-                  </option>
-                  {/* Add more discount types here */}
-                </select>
-              </div>
-            </div>
-            <div className="section">
-              <h2>Category</h2>
-              <div className="input-group my-3">
-                <label htmlFor="category">Product Category</label>
-                <input
-                  className="form-control w-100"
-                  type="text"
-                  id="category"
-                  name="category"
-                  value={product.category}
-                  onChange={(e) =>
-                    setProduct((prevProduct) => ({
-                      ...prevProduct,
-                      category: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
+          <div className="w-100 d-flex flex-row-reverse">
+            <button
+              className="btn btn-outline-primary my-4"
+              type="submit"
+              id="formSubmit"
+            >
+              Submit
+            </button>
           </div>
-          <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12">
-            <div className="d-flex justify-content-between align-items-center">
-              <button
-                className="btn btn-outline-danger"
-                onClick={handleSaveDraft}
-              >
-                Save Draft
-              </button>
-              <button
-                className="btn btn-outline-primary"
-                onClick={handleSubmit}
-              >
-                Add Product
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* //////////  table //////////////// */}
-      <div className="border">
-        <div className="image_container">
-          {showdata.map((data, index) => (
-            <div key={index} className="border_img border border-2 ">
-              {data.images.map((dat, imgIndex) => (
-                <img
-                  className="rounded_image"
-                  src={`${dat}`}
-                  alt=""
-                  width="50px"
-                  height="50px"
-                  key={imgIndex}
-                  style={{
-                    transform: `rotate(${
-                      imgIndex * (360 / data.images.length)
-                    }deg) translate(100px) rotate(-${
-                      imgIndex * (360 / data.images.length)
-                    }deg)`,
-                  }}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
+        </form>
       </div>
     </div>
   );
