@@ -6,8 +6,8 @@ const ProductService = {
   addProduct: (data: any) => {
     return axios.post(`${baseUrl}product/add-product`, data);
   },
-  getProduct: () => {
-    return axios.get(`${baseUrl}product/get-products`);
+  getProduct: (data:any) => {
+    return axios.get(`${baseUrl}product/get-products` ,data);
   },
 };
 

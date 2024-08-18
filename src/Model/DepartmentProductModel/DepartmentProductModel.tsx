@@ -16,4 +16,5 @@ export interface ProductModel {
   hover: number;
   rating:number;
   onSale:boolean
+  featured:boolean
 }

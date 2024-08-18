@@ -1,6 +1,6 @@
 .card_cover {
-    border-radius: 20px;
-  }
+  border-radius: 20px;
+}
 
 .card_header {
   display: flex;
@@ -16,21 +16,60 @@
   width: 80px;
   height: 80px;
 }
-.cursor_pointer{
-cursor: pointer;
+.cursor_pointer {
+  cursor: pointer;
 }
-.card_cover .img_section{
-height: 200px;
+.card_cover .img_section {
+  height: 200px;
 }
-.progress_bar{
+.progress_bar {
   height: 30px;
-  border-radius: 50px;  
+  border-radius: 50px;
 }
-.progress_bar_inner{
-    height: 28px;
-    border-radius: 50px;
+.progress_bar_inner {
+  height: 28px;
+  border-radius: 50px;
 }
-.offer_timer{
-    height: 50px;
-    width: 50px;
+.offer_timer {
+  height: 50px;
+  width: 50px;
+}
+
+.card_cover_card {
+  padding: 1px;
+  width: 280px;
+}
+.card_cover_card:hover {
+  padding: 1px;
+  width: 280px;
+box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.card_header {
+  position: relative;
+}
+.side_Images {
+  position: absolute;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  z-index: 10;
+}
+
+.main_Images {
+  position: relative;
+  width: 100%;
+  height: 225px;
+}
+.main_Images img{
+  object-fit: fit;
+}
+.buy_product{
+width: 50px;
+height: 50px;
+display: flex;
+justify-content: center;
+align-items: center;
+border-radius:  50px;
+font-size: 30px;
 }

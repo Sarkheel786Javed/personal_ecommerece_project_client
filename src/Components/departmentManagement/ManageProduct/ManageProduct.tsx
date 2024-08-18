@@ -3,15 +3,13 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import "./styles.scss";
 import { ProductModel } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
 import {
+  Checkbox,
   FormControlLabel,
-  FormLabel,
   Radio,
   RadioGroup,
   TextField,
 } from "@mui/material";
 import { ProductService } from "../../../Services/ProductServices/ProductServices";
-import axios from "axios";
-
 const initialProduct: ProductModel = {
   productName: "",
   description: "",
@@ -29,6 +27,7 @@ const initialProduct: ProductModel = {
   hover: 0,
   rating: 0,
   onSale: false,
+  featured: false,
 };
 
 const ManageProduct = () => {
@@ -43,6 +42,7 @@ const ManageProduct = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ProductModel>({
     defaultValues: initialProduct,
@@ -126,29 +126,25 @@ const ManageProduct = () => {
       formData.append("gender", data.gender);
       formData.append("size", data.size);
       formData.append("description", data.description);
+      formData.append("rating", data.rating.toString());
+      formData.append("onSale", data.onSale.toString());
+      formData.append("featured", data.featured.toString());
 
-      data.images!.forEach((file) => {
+      // Append images
+      product.images.forEach((file) => {
         formData.append("images", file);
       });
 
-      const response = await ProductService.addProduct(formData)
-      console.log("Product added:", response.data);
-      // getData();
+      await ProductService.addProduct(formData).then((res) => {
+        if (res.data) {
+          reset();
+        }
+      });
     } catch (error) {
       console.error("Error adding product:", error);
       setErrorMessage("An error occurred while adding the product.");
     }
   };
-
-  // const [showdata, getShowData] = useState<ProductModel[]>([]);
-  // useEffect(() => {
-  //   getData();
-  // }, []);
-  // const getData = async () => {
-  //   await ProductService.getProduct().then((res) => {
-  //     getShowData(res.data);
-  //   });
-  // };
 
   return (
     <div className="w-100">
@@ -165,7 +161,9 @@ const ManageProduct = () => {
                   fullWidth
                   id="outlined-error"
                   label="Product Name"
-                  {...register("productName", { required: "Product name is required" })}
+                  {...register("productName", {
+                    required: "Product name is required",
+                  })}
                   error={!!errors.productName}
                   helperText={errors.productName?.message}
                 />
@@ -177,7 +175,9 @@ const ManageProduct = () => {
                   label="Description"
                   multiline
                   rows={4}
-                  {...register("description", { required: "Description is required" })}
+                  {...register("description", {
+                    required: "Description is required",
+                  })}
                   error={!!errors.description}
                   helperText={errors.description?.message}
                 />
@@ -211,18 +211,20 @@ const ManageProduct = () => {
                         }
                       >
                         <img
-                          className={`rounded my-1 ${product.hover === index
+                          className={`rounded my-1 ${
+                            product.hover === index
                               ? "inner_img_hover"
                               : "inner_img"
-                            } `}
+                          } `}
                           src={URL.createObjectURL(image)}
                           alt={`Product ${index}`}
                           width="100%"
                           style={{ maxHeight: "400px" }}
                         />
                         <div
-                          className={`${product.hover === index ? "d-flex" : "d-none"
-                            } position-absolute border bg-danger rounded delete_img`}
+                          className={`${
+                            product.hover === index ? "d-flex" : "d-none"
+                          } position-absolute border bg-danger rounded delete_img`}
                           onClick={() => handleImageDelete(index)}
                         >
                           X
@@ -233,9 +235,7 @@ const ManageProduct = () => {
                   <div className="large_image">
                     {product.singleImg && (
                       <>
-                        <p className="text-center">
-                          {product.singleImgName}
-                        </p>
+                        <p className="text-center">{product.singleImgName}</p>
                         <img
                           src={product.singleImg}
                           alt={`Product`}
@@ -253,14 +253,17 @@ const ManageProduct = () => {
                     id="outlined-select-currency-native"
                     select
                     label="Size"
-                    {...register("size")}
+                    {...register("size", { required: "Size is required" })}
                     SelectProps={{
                       native: true,
                     }}
+                    error={!!errors.size}
+                    helperText={errors.size?.message}
                   >
                     <option value="XS">XS</option>
                     <option value="S">S</option>
                     <option value="M">M</option>
+                    <option value="L">L</option>
                     <option value="XL">XL</option>
                     <option value="XXL">XXL</option>
                   </TextField>
@@ -271,6 +274,12 @@ const ManageProduct = () => {
                       defaultValue="Unisex"
                       aria-labelledby="demo-radio-buttons-group-label"
                       {...register("gender")}
+                      onChange={(e) =>
+                        setProduct((prevProduct) => ({
+                          ...prevProduct,
+                          gender: (e.target as HTMLInputElement).value,
+                        }))
+                      }
                     >
                       <FormControlLabel
                         value="Unisex"
@@ -293,75 +302,238 @@ const ManageProduct = () => {
               </div>
               <div className="w-100 d-flex flex-wrap justify-content-start align-items-start gap-3 my-3">
                 <TextField
-                  fullWidth
-                  id="outlined-error"
-                  label="Price"
-                  type="number"
-                  {...register("price", {
-                    required: "Price is required",
-                    min: {
-                      value: 0,
-                      message: "Price must be greater than or equal to 0",
-                    },
+                  id="outlined-select-currency-native"
+                  select
+                  label="Discount Type"
+                  {...register("discountType", {
+                    required: "Discount type is required",
                   })}
-                  error={!!errors.price}
-                  helperText={errors.price?.message}
-                />
+                  SelectProps={{
+                    native: true,
+                  }}
+                  error={!!errors.discountType}
+                  helperText={errors.discountType?.message}
+                >
+                  <option value="Chinese New Year Discount">
+                    Chinese New Year Discount
+                  </option>
+                  <option value="Diwali Discount">Diwali Discount</option>
+                  <option value="Christmas Discount">Christmas Discount</option>
+                  <option value="Summer Discount">Summer Discount</option>
+                  <option value="Winter Discount">Winter Discount</option>
+                  <option value="Black Friday Discount">
+                    Black Friday Discount
+                  </option>
+                </TextField>
                 <TextField
-                  fullWidth
-                  id="outlined-error"
-                  label="Stock"
                   type="number"
-                  {...register("stock", {
-                    required: "Stock is required",
-                    min: {
-                      value: 0,
-                      message: "Stock must be greater than or equal to 0",
-                    },
-                  })}
-                  error={!!errors.stock}
-                  helperText={errors.stock?.message}
-                />
-                <TextField
-                  fullWidth
-                  id="outlined-error"
                   label="Discount"
-                  type="number"
                   {...register("discount", {
-                    min: {
-                      value: 0,
-                      message: "Discount must be greater than or equal to 0",
-                    },
+                    required: "Discount is required",
                   })}
                   error={!!errors.discount}
                   helperText={errors.discount?.message}
                 />
-              </div>
-              <div className="w-100">
                 <TextField
-                  fullWidth
-                  id="outlined-error"
+                  type="number"
+                  label="Price"
+                  {...register("price", { required: "Price is required" })}
+                  error={!!errors.price}
+                  helperText={errors.price?.message}
+                />
+                <TextField
+                  type="number"
+                  label="Stock"
+                  {...register("stock", { required: "Stock is required" })}
+                  error={!!errors.stock}
+                  helperText={errors.stock?.message}
+                />
+                <TextField
                   label="Category"
-                  {...register("category", { required: "Category is required" })}
+                  {...register("category", {
+                    required: "Category is required",
+                  })}
                   error={!!errors.category}
                   helperText={errors.category?.message}
+                />
+
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      {...register("onSale")}
+                      checked={product.onSale}
+                      onChange={(e) =>
+                        setProduct((prevProduct) => ({
+                          ...prevProduct,
+                          onSale: e.target.checked,
+                        }))
+                      }
+                    />
+                  }
+                  label="On Sale"
                 />
               </div>
             </div>
           </div>
-          <div className="w-100 d-flex flex-row-reverse">
-            <button
-              className="btn btn-outline-primary my-4"
-              type="submit"
-              id="formSubmit"
-            >
-              Submit
-            </button>
-          </div>
+          <button className="btn btn-success my-3" type="submit">
+            Save Product
+          </button>
         </form>
       </div>
+      <GetProduct />
     </div>
   );
 };
 
 export default ManageProduct;
+
+const GetProduct = () => {
+  interface ProductModelGetProduct {
+    productName: string;
+    rating: number;
+    onSale: boolean;
+    featured: boolean;
+  }
+  const [tab, setTab] = useState("rating");
+  const [handleFilter, setHandleFilter] = useState<ProductModelGetProduct>({
+    productName: "",
+    rating: 1,
+    onSale: false,
+    featured: false,
+  });
+  useEffect(() => {
+    fetchProducts;
+  }, [tab, handleFilter]);
+
+  const [products, setProducts] = useState<ProductModel[]>([]);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await ProductService.getProduct({
+        params: {
+          productName: handleFilter.productName,
+          rating: handleFilter.rating,
+          onSale: handleFilter.onSale,
+          featured: handleFilter.featured,
+        },
+      });
+      // Ensure response.data is an array
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setProducts([]); // Reset to an empty array on error
+    }
+  };
+  return (
+    <>
+      <div className="d-flex justify-content-start align-items-center border-bottom w-100">
+        <div className="w-75 d-flex justify-content-center align-items-center gap-3 py-2">
+          <div
+            className={`p-2 rounded-4 ${
+              tab === "rating" ? "bg-warning shadow" : ""
+            }`}
+            style={{ cursor: "pointer" }}
+            onClick={() => [
+              setHandleFilter((preValue) => ({
+                ...preValue,
+                rating: 1,
+                productName: "",
+                onSale: false,
+                featured: false,
+              })),
+              setTab("rating"),
+            ]}
+          >
+            Rating
+          </div>
+          <div
+            className={`p-2 rounded-4 ${
+              tab === "onSale" ? "bg-warning shadow" : ""
+            }`}
+            style={{ cursor: "pointer" }}
+            onClick={() => [
+              setHandleFilter((preValue) => ({
+                ...preValue,
+                onSale: true,
+                rating: 0,
+                productName: "",
+                featured: false,
+              })),
+              setTab("onSale"),
+            ]}
+          >
+            On Sale
+          </div>
+          <div
+            className={`p-2 rounded-4 ${
+              tab === "featured" ? "bg-warning shadow" : ""
+            }`}
+            style={{ cursor: "pointer" }}
+            onClick={() => [
+              setHandleFilter((preValue) => ({
+                ...preValue,
+                featured: true,
+                onSale: false,
+                rating: 0,
+                productName: "",
+              })),
+              setTab("featured"),
+            ]}
+          >
+            Featured
+          </div>
+        </div>
+        <div className="w-25 d-flex justify-content-center align-items-center gap-3 py-2">
+          <input
+            className="form-control"
+            type="text"
+            placeholder="Search products..."
+            value={handleFilter.productName}
+            onChange={(e) =>
+              setHandleFilter((preValue) => ({
+                ...preValue,
+                productName: e.target.value,
+              }))
+            }
+          />
+          <button
+            className="btn btn-outline-primary"
+            onClick={() => fetchProducts()}
+          >
+            Search
+          </button>
+        </div>
+      </div>
+      <div className="">
+        {products.length > 0 ? (
+          <>
+            {products.map(() => (
+              <>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">First</th>
+                      <th scope="col">Last</th>
+                      <th scope="col">Handle</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">1</th>
+                      <td>Mark</td>
+                      <td>Otto</td>
+                      <td>@mdo</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </>
+            ))}
+          </>
+        ) : (
+          <>No Product Found</>
+        )}
+      </div>
+    </>
+  );
+};

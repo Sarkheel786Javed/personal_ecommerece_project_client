@@ -1,7 +1,7 @@
 // import * as React from "react";
 import { useState } from "react";
 import styles from "./navbar.module.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // const drawerWidth = 240;
 // const navItems = [
 //   { Title: "Home", Icon: "", Path: "/home" },
@@ -81,6 +81,16 @@ function Navbar() {
     },
   ];
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
+  const [searchString, setSearchString] = useState<string>("");
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    if (searchString) {
+      navigate(`/?q=${searchString}`);
+    }
+    console.log(searchString);
+  };
+
   return (
     <div>
       {/* ///////////////////////top////////////////////// */}
@@ -136,6 +146,8 @@ function Navbar() {
                 <input
                   type="text"
                   autoComplete="false"
+                  value={searchString}
+                  onChange={(e) => setSearchString(e.target.value)}
                   placeholder="Search for Products"
                   className={`mx-1 w-100 ps-3 ${styles.input}`}
                 />
@@ -175,7 +187,11 @@ function Navbar() {
                   </ul>
                 </div>
               </div>
-              <i className=" cursor-pointer mx-4 bi bi-search"></i>
+              <i
+                className="mx-4 bi bi-search"
+                style={{ cursor: "pointer" }}
+                onClick={handleSearch}
+              />
             </div>
           </div>
           <div className={` ${styles.SearchIcon_on_small_screen}`}>
@@ -263,15 +279,19 @@ function Navbar() {
               <input
                 type="text"
                 autoComplete="false"
+                value={searchString}
+                onChange={(e) => setSearchString(e.target.value)}
                 placeholder="Search for Products"
                 className={`w-100 px-3 ${styles.input}`}
               />
               <span
-                className="cursor-pointer mx-4 bi bi-search"
+                className="mx-4 bi bi-search"
+                style={{ cursor: "pointer" }}
                 data-bs-toggle="collapse"
                 data-bs-target="#collapseExample"
                 aria-expanded="false"
                 aria-controls="collapseExample"
+                onClick={handleSearch}
               />
             </div>
           </div>
