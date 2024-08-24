@@ -8,7 +8,7 @@ import Dropzone, { Accept, FileRejection } from "react-dropzone";
 import Swal from "sweetalert2";
 
 const initialProduct: ProductModel = {
-  _id:"",
+  _id: "",
   productName: "",
   description: "",
   size: "M",
@@ -31,15 +31,15 @@ const initialProduct: ProductModel = {
 const ManageProduct = () => {
   const Toast = Swal.mixin({
     toast: true,
-    position: 'top-end',
+    position: "top-end",
     showConfirmButton: false,
     timer: 2000,
     timerProgressBar: true,
     didOpen: (toast) => {
-      toast.onmouseenter = Swal.stopTimer
-      toast.onmouseleave = Swal.resumeTimer
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
     },
-  })
+  });
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -98,14 +98,14 @@ const ManageProduct = () => {
       };
     });
   };
-const [id,setId]=useState("")
+  const [id, setId] = useState("");
   const onSubmit: SubmitHandler<ProductModel> = async (data) => {
     try {
       const formData = new FormData();
-if(id){
-  formData.append("_id", id);
-}
-      
+      if (id) {
+        formData.append("_id", id);
+      }
+
       formData.append("productName", data.productName || "");
       formData.append("category", data.category || "");
       formData.append("discountType", data.discountType || "");
@@ -125,51 +125,34 @@ if(id){
 
       await ProductService.addProduct(formData).then((res) => {
         if (res.data) {
-          reset();
           setProduct(initialProduct);
           setErrorMessage(null);
-         setId("")
-         fetchProducts();
+          setId("");
+          fetchProducts();
         }
         Toast.fire({
           showCloseButton: true,
-          icon: 'success',
+          icon: "success",
           title: res.data.message,
-        })
+        });
+        reset();
       });
-
     } catch (error) {
       console.error("Error adding product:", error);
       setErrorMessage("An error occurred while adding the product.");
     }
   };
   ///////////////////////////////////////get product/////////////////////////////
-  interface ProductModelGetProduct {
-    productName: string;
-    rating: number;
-    onSale: boolean;
-    featured: boolean;
-  }
-  const [handleFilter, setHandleFilter] = useState<ProductModelGetProduct>({
-    productName: "",
-    rating: 0,
-    onSale: false,
-    featured: false,
-  });
-  useEffect(() => {
-    fetchProducts();
-  }, [handleFilter]);
-
   const [productsTable, setProductsTable] = useState<any[]>([]);
 
   const fetchProducts = async () => {
     try {
       const response = await ProductService.getProduct({
         params: {
-          productName: handleFilter.productName,
-          rating: handleFilter.rating,
-          onSale: handleFilter.onSale,
-          featured: handleFilter.featured,
+          productName: "",
+          rating: 0,
+          onSale: false,
+          featured: false,
         },
       });
       // Ensure response.data is an array
@@ -203,54 +186,85 @@ if(id){
         onSale: data.onSale,
         featured: data.featured,
       });
-      setId(data._id!)
+      setId(data._id!);
+    };
+    const handledeleteProduct = async (ProductId: string) => {
+      try {
+        const response = await ProductService.deleteProduct(ProductId);
+        // Ensure response.data is an array
+        if (response.data) {
+          Toast.fire({
+            showCloseButton: true,
+            icon: "success",
+            title: response.data.message,
+          });
+          fetchProducts();
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setProductsTable([]); // Reset to an empty array on error
+      }
     };
 
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(e.target.value);
+    };
+
+    const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        try {
+          const response = await ProductService.getProduct({
+            params: {
+              productName: searchTerm,
+              rating: 0,
+              onSale: false,
+              featured: false,
+            },
+          });
+          // Ensure response.data is an array
+          if (response.data.length > 0) {
+            setProductsTable(response.data);
+          }
+        } catch (error) {
+          console.error("Error fetching products:", error);
+        }
+      }
+    };
     return (
       <>
         <div className="container">
           <div className="d-flex justify-content-start align-items-center border-bottom w-100">
-            <div className="w-75 d-flex justify-content-center align-items-center gap-3 py-2">
-              {/* Your tab buttons here */}
-            </div>
-            <div className="w-25 d-flex justify-content-center align-items-center gap-3 py-2">
-              <input
-                className="form-control"
-                type="text"
-                placeholder="Search products..."
-                value={handleFilter.productName}
-                onChange={(e) =>
-                  setHandleFilter((preValue) => ({
-                    ...preValue,
-                    productName: e.target.value,
-                  }))
-                }
+            <div className="w-50 d-flex justify-content-center align-items-center gap-3 py-2"></div>
+            <div className="w-50 d-flex justify-content-end align-items-center gap-3 py-2">
+              <TextField
+                id="outlined-size-small"
+                placeholder="Search Product Name"
+                size="small"
+                value={searchTerm}
+                onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
               />
-              <button
-                className="btn btn-outline-primary"
-                onClick={() => fetchProducts()}
-              >
-                Search
-              </button>
             </div>
           </div>
           <div className="w-100">
             {productsTable.length > 0 ? (
               <>
-                {productsTable.map((data) => (
-                  <table className="table table-hover" key={data._id}>
-                    <thead>
-                      <tr>
-                        <th scope="col">Product Name</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Discount</th>
-                        <th scope="col">Handle</th>
-                        <th scope="col">Update</th>
-                        <th scope="col">Delete</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
+                <table className="table table-hover">
+                  <thead>
+                    <tr>
+                      <th scope="col">Product Name</th>
+                      <th scope="col">Price</th>
+                      <th scope="col">Discount</th>
+                      <th scope="col">Handle</th>
+                      <th scope="col">Update</th>
+                      <th scope="col">Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productsTable.map((data) => (
+                      <tr key={data._id}>
                         <th scope="row">{data.productName}</th>
                         <td>{data.price}</td>
                         <td>{data.discount}</td>
@@ -263,11 +277,18 @@ if(id){
                             Edit
                           </button>
                         </td>
-                        <td>Delete</td>
+                        <td>
+                          <button
+                            className="btn btn-outline-danger"
+                            onClick={() => handledeleteProduct(data._id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
-                    </tbody>
-                  </table>
-                ))}
+                    ))}
+                  </tbody>
+                </table>
               </>
             ) : (
               <>No Product Found</>
@@ -373,88 +394,89 @@ if(id){
                   ))}
                 </div>
               </div>
-              <div className="w-100 d-flex flex-wrap justify-content-start align-items-start gap-3 my-3">
-                <TextField
-                  id="outlined-select-currency-native"
-                  select
-                  label="Discount Type"
-                  {...register("discountType", {
-                    required: "Discount type is required",
-                  })}
-                  SelectProps={{
-                    native: true,
-                  }}
-                  error={!!errors.discountType}
-                  helperText={errors.discountType?.message}
-                >
-                  <option value="Chinese New Year Discount">
-                    Chinese New Year Discount
-                  </option>
-                  <option value="Diwali Discount">Diwali Discount</option>
-                  <option value="Christmas Discount">Christmas Discount</option>
-                  <option value="Summer Discount">Summer Discount</option>
-                  <option value="Winter Discount">Winter Discount</option>
-                  <option value="Black Friday Discount">
-                    Black Friday Discount
-                  </option>
-                </TextField>
-                <TextField
-                  type="number"
-                  label="Discount"
-                  {...register("discount", {
-                    required: "Discount is required",
-                  })}
-                  error={!!errors.discount}
-                  helperText={errors.discount?.message}
-                />
-                <TextField
-                  type="number"
-                  label="Price"
-                  {...register("price", { required: "Price is required" })}
-                  error={!!errors.price}
-                  helperText={errors.price?.message}
-                />
-                <TextField
-                  type="number"
-                  label="Stock"
-                  {...register("stock", { required: "Stock is required" })}
-                  error={!!errors.stock}
-                  helperText={errors.stock?.message}
-                />
-                <TextField
-                  label="Category"
-                  {...register("category", {
-                    required: "Category is required",
-                  })}
-                  error={!!errors.category}
-                  helperText={errors.category?.message}
-                />
+            </div>
+            <div className="col-xs-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4">
+              <TextField
+                className="mb-4"
+                id="outlined-select-currency-native"
+                select
+                label="Discount Type"
+                {...register("discountType", {
+                  required: "Discount type is required",
+                })}
+                SelectProps={{
+                  native: true,
+                }}
+                error={!!errors.discountType}
+                helperText={errors.discountType?.message}
+              >
+                <option value="Chinese New Year Discount">
+                  Chinese New Year Discount
+                </option>
+                <option value="Diwali Discount">Diwali Discount</option>
+                <option value="Christmas Discount">Christmas Discount</option>
+                <option value="Summer Discount">Summer Discount</option>
+                <option value="Winter Discount">Winter Discount</option>
+                <option value="Black Friday Discount">
+                  Black Friday Discount
+                </option>
+              </TextField>
+              <TextField
+                className="mb-4"
+                type="number"
+                label="Discount"
+                {...register("discount", {
+                  required: "Discount is required",
+                })}
+                error={!!errors.discount}
+                helperText={errors.discount?.message}
+              />
+              <TextField
+                className="mb-4"
+                type="number"
+                label="Price"
+                {...register("price", { required: "Price is required" })}
+                error={!!errors.price}
+                helperText={errors.price?.message}
+              />
+              <TextField
+                className="mb-4"
+                type="number"
+                label="Stock"
+                {...register("stock", { required: "Stock is required" })}
+                error={!!errors.stock}
+                helperText={errors.stock?.message}
+              />
+              <TextField
+                className="mb-4"
+                label="Category"
+                {...register("category", {
+                  required: "Category is required",
+                })}
+                error={!!errors.category}
+                helperText={errors.category?.message}
+              />
 
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      {...register("onSale")}
-                      checked={product.onSale}
-                      onChange={(e) =>
-                        setProduct((prevProduct) => ({
-                          ...prevProduct,
-                          onSale: e.target.checked,
-                        }))
-                      }
-                    />
-                  }
-                  label="On Sale"
-                />
-              </div>
+              <FormControlLabel
+                className="mb-4"
+                control={
+                  <Checkbox
+                    {...register("onSale")}
+                    checked={product.onSale}
+                    onChange={(e) =>
+                      setProduct((prevProduct) => ({
+                        ...prevProduct,
+                        onSale: e.target.checked,
+                      }))
+                    }
+                  />
+                }
+                label="On Sale"
+              />
             </div>
           </div>
           <button className="btn btn-success my-3" type="submit">
-           {id ? (
-            <>Update Product</>
-           )
-          :(
-            <>Save Product</>
-          )} 
+            {id ? <>Update Product</> : <>Save Product</>}
           </button>
         </form>
       </div>
