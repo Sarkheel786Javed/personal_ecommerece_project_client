@@ -1,53 +1,31 @@
-.images-section {
+.dropzone {
+  background-color: #f0f0f0;
+  border: 2px dashed #888;
+  padding: 20px;
   width: 100%;
-  display: flex;
-  justify-content: start;
-  align-items: start;
-}
-.images-section .small_img {
-  width: 70px;
-  padding: 10px;
-}
-.images-section .small_img .inner_img {
-  border: 0px solid ;
-}
-.images-section .small_img .inner_img_hover {
- border: 1px solid red;
-}
-.images-section .delete_img{
-  top: 0;
-  right: 0;
-  width: 20px;
-  height: 20px;
-  font-size: 10px;
-  color: white;
+  height: 200px;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.large_image{
-width: 100%;
-}
-.image_container {
-  display: flex;
-  justify-content: start;
-  align-items: center;
-}
-
-.border_img {
-  position: relative;
-  width: 300px; /* Adjust size as needed */
-  height: 300px; /* Adjust size as needed */
-  border-radius: 50%;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  color: #555;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  margin-bottom: 20px;
 }
 
-.rounded_image {
-  position: absolute;
-  // top: 0%;
-  // left: 0%;
-  transform-origin: 0 0;
-  width: 50px; /* Image size */
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
+.dropzone.active {
+  background-color: #e6f7ff;
+}
+
+.dropzone:hover {
+  border-color: #007bff;
+}
+
+.dropzone p {
+  margin: 0;
+  font-weight: bold;
+  font-size: 18px;
 }

@@ -1,16 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import "./styles.scss";
 import { ProductModel } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
-import {
-  Checkbox,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  TextField,
-} from "@mui/material";
+import { Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { ProductService } from "../../../Services/ProductServices/ProductServices";
+import Dropzone, { Accept, FileRejection } from "react-dropzone";
+import Swal from "sweetalert2";
+
 const initialProduct: ProductModel = {
+  _id:"",
   productName: "",
   description: "",
   size: "M",
@@ -31,13 +29,24 @@ const initialProduct: ProductModel = {
 };
 
 const ManageProduct = () => {
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 2000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer
+      toast.onmouseleave = Swal.resumeTimer
+    },
+  })
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
   const [product, setProduct] = useState<ProductModel>(initialProduct);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState<number | null>(
-    null
-  );
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const maxFiles = 10;
+  const maxTotalFiles = 6;
 
   const {
     register,
@@ -48,89 +57,68 @@ const ManageProduct = () => {
     defaultValues: initialProduct,
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFilesArray = Array.from(e.target.files);
+  const accept: Accept = {
+    "image/jpeg": [".jpeg", ".jpg"],
+    "image/png": [".png"],
+    "image/gif": [".gif"],
+  };
 
-      if (newFilesArray.length + product.images!.length > maxFiles) {
-        setErrorMessage(`You can only upload up to ${maxFiles} images.`);
-        return;
-      }
+  const onDrop = (acceptedFiles: File[], fileRejections: FileRejection[]) => {
+    const remainingSlots = maxTotalFiles - product.images.length;
+
+    if (fileRejections.length > 0) {
+      const rejectionMessages = fileRejections.map((rejection) => {
+        const { file, errors } = rejection;
+        return errors.map((e) => `${file.name}: ${e.message}`).join(", ");
+      });
+      setErrorMessage(rejectionMessages.join("; "));
+    } else {
+      setErrorMessage(null);
+    }
+
+    if (acceptedFiles.length > remainingSlots) {
+      setErrorMessage(`You can only add ${remainingSlots} image(s).`);
+      acceptedFiles = acceptedFiles.slice(0, remainingSlots);
+    }
+
+    if (acceptedFiles.length > 0) {
       setProduct((prevProduct) => ({
         ...prevProduct,
-        images: [...prevProduct.images!, ...newFilesArray],
+        images: [...prevProduct.images, ...acceptedFiles],
       }));
-      setErrorMessage(null);
     }
   };
 
   const handleImageDelete = (index: number) => {
     setProduct((prevProduct) => {
-      const updatedImages = prevProduct.images!.filter(
-        (_: any, i: any) => i !== index
-      );
-
-      const newIndex =
-        currentImageIndex! >= updatedImages.length
-          ? updatedImages.length - 1
-          : currentImageIndex;
-
-      const newSingleImg =
-        newIndex != null && updatedImages[newIndex]
-          ? URL.createObjectURL(updatedImages[newIndex])
-          : "";
-      const newSingleImgName =
-        newIndex != null && updatedImages[newIndex]
-          ? updatedImages[newIndex].name
-          : "";
-
+      const updatedImages = prevProduct.images.filter((_, i) => i !== index);
       return {
         ...prevProduct,
         images: updatedImages,
-        singleImg: newSingleImg,
-        singleImgName: newSingleImgName,
       };
     });
-
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex !== null && prevIndex >= product.images!.length
-        ? product.images!.length - 1
-        : prevIndex
-    );
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
-
-  const handelShowLargeImg = (img: File, index: number) => {
-    setProduct((prevProduct) => ({
-      ...prevProduct,
-      singleImg: URL.createObjectURL(img),
-      singleImgName: img.name,
-      hover: index,
-    }));
-    setCurrentImageIndex(index);
-  };
-
+const [id,setId]=useState("")
   const onSubmit: SubmitHandler<ProductModel> = async (data) => {
     try {
       const formData = new FormData();
+if(id){
+  formData.append("_id", id);
+}
+      
+      formData.append("productName", data.productName || "");
+      formData.append("category", data.category || "");
+      formData.append("discountType", data.discountType || "");
+      formData.append("discount", (data.discount ?? 0).toString());
+      formData.append("stock", (data.stock ?? 0).toString());
+      formData.append("price", (data.price ?? 0).toString());
+      formData.append("gender", data.gender || "");
+      formData.append("size", data.size || "");
+      formData.append("description", data.description || "");
+      formData.append("rating", (data.rating ?? 0).toString());
+      formData.append("onSale", (data.onSale ?? false).toString());
+      formData.append("featured", (data.featured ?? false).toString());
 
-      formData.append("productName", data.productName);
-      formData.append("category", data.category);
-      formData.append("discountType", data.discountType);
-      formData.append("discount", data.discount.toString());
-      formData.append("stock", data.stock.toString());
-      formData.append("price", data.price.toString());
-      formData.append("gender", data.gender);
-      formData.append("size", data.size);
-      formData.append("description", data.description);
-      formData.append("rating", data.rating.toString());
-      formData.append("onSale", data.onSale.toString());
-      formData.append("featured", data.featured.toString());
-
-      // Append images
       product.images.forEach((file) => {
         formData.append("images", file);
       });
@@ -138,12 +126,156 @@ const ManageProduct = () => {
       await ProductService.addProduct(formData).then((res) => {
         if (res.data) {
           reset();
+          setProduct(initialProduct);
+          setErrorMessage(null);
+         setId("")
+         fetchProducts();
         }
+        Toast.fire({
+          showCloseButton: true,
+          icon: 'success',
+          title: res.data.message,
+        })
       });
+
     } catch (error) {
       console.error("Error adding product:", error);
       setErrorMessage("An error occurred while adding the product.");
     }
+  };
+  ///////////////////////////////////////get product/////////////////////////////
+  interface ProductModelGetProduct {
+    productName: string;
+    rating: number;
+    onSale: boolean;
+    featured: boolean;
+  }
+  const [handleFilter, setHandleFilter] = useState<ProductModelGetProduct>({
+    productName: "",
+    rating: 0,
+    onSale: false,
+    featured: false,
+  });
+  useEffect(() => {
+    fetchProducts();
+  }, [handleFilter]);
+
+  const [productsTable, setProductsTable] = useState<any[]>([]);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await ProductService.getProduct({
+        params: {
+          productName: handleFilter.productName,
+          rating: handleFilter.rating,
+          onSale: handleFilter.onSale,
+          featured: handleFilter.featured,
+        },
+      });
+      // Ensure response.data is an array
+      if (response.data.length > 0) {
+        setProductsTable(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setProductsTable([]); // Reset to an empty array on error
+    }
+  };
+  const ProductDetail = () => {
+    const setValues = (data: ProductModel) => {
+      setProduct(data);
+      reset({
+        productName: data.productName,
+        description: data.description,
+        size: data.size,
+        gender: data.gender,
+        price: data.price,
+        stock: data.stock,
+        discount: data.discount,
+        discountType: data.discountType,
+        category: data.category,
+        imageUrls: data.imageUrls,
+        images: data.images,
+        singleImg: data.singleImg,
+        singleImgName: data.singleImgName,
+        hover: data.hover,
+        rating: data.rating,
+        onSale: data.onSale,
+        featured: data.featured,
+      });
+      setId(data._id!)
+    };
+
+    return (
+      <>
+        <div className="container">
+          <div className="d-flex justify-content-start align-items-center border-bottom w-100">
+            <div className="w-75 d-flex justify-content-center align-items-center gap-3 py-2">
+              {/* Your tab buttons here */}
+            </div>
+            <div className="w-25 d-flex justify-content-center align-items-center gap-3 py-2">
+              <input
+                className="form-control"
+                type="text"
+                placeholder="Search products..."
+                value={handleFilter.productName}
+                onChange={(e) =>
+                  setHandleFilter((preValue) => ({
+                    ...preValue,
+                    productName: e.target.value,
+                  }))
+                }
+              />
+              <button
+                className="btn btn-outline-primary"
+                onClick={() => fetchProducts()}
+              >
+                Search
+              </button>
+            </div>
+          </div>
+          <div className="w-100">
+            {productsTable.length > 0 ? (
+              <>
+                {productsTable.map((data) => (
+                  <table className="table table-hover" key={data._id}>
+                    <thead>
+                      <tr>
+                        <th scope="col">Product Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Discount</th>
+                        <th scope="col">Handle</th>
+                        <th scope="col">Update</th>
+                        <th scope="col">Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th scope="row">{data.productName}</th>
+                        <td>{data.price}</td>
+                        <td>{data.discount}</td>
+                        <td></td>
+                        <td>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => setValues(data)}
+                          >
+                            Edit
+                          </button>
+                        </td>
+                        <td>Delete</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                ))}
+              </>
+            ) : (
+              <>No Product Found</>
+            )}
+          </div>
+        </div>
+      </>
+    );
   };
 
   return (
@@ -158,8 +290,8 @@ const ManageProduct = () => {
             <div className="col-xs-12 col-sm-12 col-md-12 col-lg-8 col-xl-8 col-xxl-8">
               <div className="input-group my-3">
                 <TextField
-                  fullWidth
-                  id="outlined-error"
+                  id="outlined-required"
+                  type="text"
                   label="Product Name"
                   {...register("productName", {
                     required: "Product name is required",
@@ -183,121 +315,62 @@ const ManageProduct = () => {
                 />
               </div>
               <div className="w-100 mt-4">
-                <h2>Upload Image</h2>
-                <input
-                  className="form-control w-100"
-                  type="file"
-                  name="images"
-                  accept="image/*"
-                  multiple
-                  ref={fileInputRef}
-                  onChange={handleInputChange}
-                />
+                <h2>Upload Images</h2>
+                <Dropzone onDrop={onDrop} accept={accept}>
+                  {({ getRootProps, getInputProps, isDragActive }) => (
+                    <div
+                      {...getRootProps({
+                        className: isDragActive
+                          ? "dropzone active"
+                          : "dropzone",
+                      })}
+                    >
+                      <input {...getInputProps()} />
+                      {isDragActive ? (
+                        <p>Drop the files here ...</p>
+                      ) : (
+                        <p>
+                          Drag 'n' drop some files here, or click to select
+                          files
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </Dropzone>
+
                 {errorMessage && (
-                  <div className="text-danger">{errorMessage}</div>
+                  <div className="text-danger mt-2">{errorMessage}</div>
                 )}
-                <div className="images-section">
-                  <div className="product small_img">
-                    {product.images!.slice(0, maxFiles).map((image, index) => (
-                      <div
-                        key={index}
-                        className="position-relative"
-                        onMouseEnter={() => handelShowLargeImg(image, index)}
-                        onMouseDown={() =>
-                          setProduct((prevProduct) => ({
-                            ...prevProduct,
-                            hover: index,
-                          }))
-                        }
-                      >
+
+                <div className="row my-3">
+                  {product.images.map((image, index) => (
+                    <div
+                      key={index}
+                      className="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-3 col-xxl-3 mx-auto"
+                    >
+                      <div className="card text-center">
                         <img
-                          className={`rounded my-1 ${
-                            product.hover === index
-                              ? "inner_img_hover"
-                              : "inner_img"
-                          } `}
-                          src={URL.createObjectURL(image)}
-                          alt={`Product ${index}`}
-                          width="100%"
-                          style={{ maxHeight: "400px" }}
+                          src={
+                            typeof image === "string"
+                              ? image
+                              : URL.createObjectURL(image)
+                          }
+                          alt={`product-${index}`}
+                          className="card-img-top img-fluid"
                         />
-                        <div
-                          className={`${
-                            product.hover === index ? "d-flex" : "d-none"
-                          } position-absolute border bg-danger rounded delete_img`}
-                          onClick={() => handleImageDelete(index)}
-                        >
-                          X
+
+                        <div className="card-body">
+                          <button
+                            type="button"
+                            className="btn btn-danger"
+                            onClick={() => handleImageDelete(index)}
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                  <div className="large_image">
-                    {product.singleImg && (
-                      <>
-                        <p className="text-center">{product.singleImgName}</p>
-                        <img
-                          src={product.singleImg}
-                          alt={`Product`}
-                          width="100%"
-                          style={{ maxHeight: "400px" }}
-                        />
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="section">
-                <div className="w-100 d-flex flex-wrap justify-content-start align-items-start gap-3 my-3">
-                  <TextField
-                    id="outlined-select-currency-native"
-                    select
-                    label="Size"
-                    {...register("size", { required: "Size is required" })}
-                    SelectProps={{
-                      native: true,
-                    }}
-                    error={!!errors.size}
-                    helperText={errors.size?.message}
-                  >
-                    <option value="XS">XS</option>
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="XL">XL</option>
-                    <option value="XXL">XXL</option>
-                  </TextField>
-                  <div className="section">
-                    <h5>Gender</h5>
-                    <RadioGroup
-                      row
-                      defaultValue="Unisex"
-                      aria-labelledby="demo-radio-buttons-group-label"
-                      {...register("gender")}
-                      onChange={(e) =>
-                        setProduct((prevProduct) => ({
-                          ...prevProduct,
-                          gender: (e.target as HTMLInputElement).value,
-                        }))
-                      }
-                    >
-                      <FormControlLabel
-                        value="Unisex"
-                        control={<Radio />}
-                        label="Unisex"
-                      />
-                      <FormControlLabel
-                        value="Male"
-                        control={<Radio />}
-                        label="Male"
-                      />
-                      <FormControlLabel
-                        value="Female"
-                        control={<Radio />}
-                        label="Female"
-                      />
-                    </RadioGroup>
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="w-100 d-flex flex-wrap justify-content-start align-items-start gap-3 my-3">
@@ -376,164 +449,18 @@ const ManageProduct = () => {
             </div>
           </div>
           <button className="btn btn-success my-3" type="submit">
-            Save Product
+           {id ? (
+            <>Update Product</>
+           )
+          :(
+            <>Save Product</>
+          )} 
           </button>
         </form>
       </div>
-      <GetProduct />
+      <ProductDetail />
     </div>
   );
 };
 
 export default ManageProduct;
-
-const GetProduct = () => {
-  interface ProductModelGetProduct {
-    productName: string;
-    rating: number;
-    onSale: boolean;
-    featured: boolean;
-  }
-  const [tab, setTab] = useState("rating");
-  const [handleFilter, setHandleFilter] = useState<ProductModelGetProduct>({
-    productName: "",
-    rating: 1,
-    onSale: false,
-    featured: false,
-  });
-  useEffect(() => {
-    fetchProducts;
-  }, [tab, handleFilter]);
-
-  const [products, setProducts] = useState<ProductModel[]>([]);
-
-  const fetchProducts = async () => {
-    try {
-      const response = await ProductService.getProduct({
-        params: {
-          productName: handleFilter.productName,
-          rating: handleFilter.rating,
-          onSale: handleFilter.onSale,
-          featured: handleFilter.featured,
-        },
-      });
-      // Ensure response.data is an array
-      setProducts(response.data);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      setProducts([]); // Reset to an empty array on error
-    }
-  };
-  return (
-    <>
-      <div className="d-flex justify-content-start align-items-center border-bottom w-100">
-        <div className="w-75 d-flex justify-content-center align-items-center gap-3 py-2">
-          <div
-            className={`p-2 rounded-4 ${
-              tab === "rating" ? "bg-warning shadow" : ""
-            }`}
-            style={{ cursor: "pointer" }}
-            onClick={() => [
-              setHandleFilter((preValue) => ({
-                ...preValue,
-                rating: 1,
-                productName: "",
-                onSale: false,
-                featured: false,
-              })),
-              setTab("rating"),
-            ]}
-          >
-            Rating
-          </div>
-          <div
-            className={`p-2 rounded-4 ${
-              tab === "onSale" ? "bg-warning shadow" : ""
-            }`}
-            style={{ cursor: "pointer" }}
-            onClick={() => [
-              setHandleFilter((preValue) => ({
-                ...preValue,
-                onSale: true,
-                rating: 0,
-                productName: "",
-                featured: false,
-              })),
-              setTab("onSale"),
-            ]}
-          >
-            On Sale
-          </div>
-          <div
-            className={`p-2 rounded-4 ${
-              tab === "featured" ? "bg-warning shadow" : ""
-            }`}
-            style={{ cursor: "pointer" }}
-            onClick={() => [
-              setHandleFilter((preValue) => ({
-                ...preValue,
-                featured: true,
-                onSale: false,
-                rating: 0,
-                productName: "",
-              })),
-              setTab("featured"),
-            ]}
-          >
-            Featured
-          </div>
-        </div>
-        <div className="w-25 d-flex justify-content-center align-items-center gap-3 py-2">
-          <input
-            className="form-control"
-            type="text"
-            placeholder="Search products..."
-            value={handleFilter.productName}
-            onChange={(e) =>
-              setHandleFilter((preValue) => ({
-                ...preValue,
-                productName: e.target.value,
-              }))
-            }
-          />
-          <button
-            className="btn btn-outline-primary"
-            onClick={() => fetchProducts()}
-          >
-            Search
-          </button>
-        </div>
-      </div>
-      <div className="">
-        {products.length > 0 ? (
-          <>
-            {products.map(() => (
-              <>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">#</th>
-                      <th scope="col">First</th>
-                      <th scope="col">Last</th>
-                      <th scope="col">Handle</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row">1</th>
-                      <td>Mark</td>
-                      <td>Otto</td>
-                      <td>@mdo</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </>
-            ))}
-          </>
-        ) : (
-          <>No Product Found</>
-        )}
-      </div>
-    </>
-  );
-};

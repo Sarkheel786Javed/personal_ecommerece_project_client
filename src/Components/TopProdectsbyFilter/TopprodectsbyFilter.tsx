@@ -128,7 +128,7 @@ function TopprodectsbyFilter() {
               <SetInterval />
             </div>
           </div>
-          <div className="col-xs-12 col-sm-12 col-md-6 col-lg-8 col-xl-8 col-xxl-8 border rounded-3">
+          <div className="col-xs-12 col-sm-12 col-md-6 col-lg-8 col-xl-8 col-xxl-8 pt-3">
             <ProductComponent />
           </div>
         </div>
@@ -175,12 +175,9 @@ const ProductComponent: React.FC = () => {
     }
   };
   const [searchQueryString] = useSearchParams();
-  useEffect(() => {
-    fetchProducts();
-  }, [tab, handleFilter]);
-
-  const navigate = useNavigate()
-  useEffect(()=>{
+   const navigate = useNavigate()
+   
+   useEffect(() => {
     const a = searchQueryString.get("q");
     if (a) {
       setHandleFilter((preValue) => ({
@@ -188,8 +185,15 @@ const ProductComponent: React.FC = () => {
         productName: a,
       }));
       navigate("/")
+      fetchProducts();
+    }else{
+       fetchProducts();
     }
-  },[searchQueryString.get("q")])
+   
+  }, [tab, handleFilter , searchQueryString.get("q")]);
+
+ 
+
   const [hoveredImageIndex, setHoveredImageIndex] = useState<
     Record<number, string>
   >({});
