@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { HtmlHTMLAttributes, useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import "./styles.scss";
 import { ProductModel } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
@@ -8,7 +8,7 @@ import Dropzone, { Accept, FileRejection } from "react-dropzone";
 import Swal from "sweetalert2";
 
 const initialProduct: ProductModel = {
-  _id:"",
+  _id: "",
   productName: "",
   description: "",
   size: "M",
@@ -31,15 +31,15 @@ const initialProduct: ProductModel = {
 const ManageProduct = () => {
   const Toast = Swal.mixin({
     toast: true,
-    position: 'top-end',
+    position: "top-end",
     showConfirmButton: false,
     timer: 2000,
     timerProgressBar: true,
     didOpen: (toast) => {
-      toast.onmouseenter = Swal.stopTimer
-      toast.onmouseleave = Swal.resumeTimer
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
     },
-  })
+  });
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -98,14 +98,14 @@ const ManageProduct = () => {
       };
     });
   };
-const [id,setId]=useState("")
+  const [id, setId] = useState("");
   const onSubmit: SubmitHandler<ProductModel> = async (data) => {
     try {
       const formData = new FormData();
-if(id){
-  formData.append("_id", id);
-}
-      
+      if (id) {
+        formData.append("_id", id);
+      }
+
       formData.append("productName", data.productName || "");
       formData.append("category", data.category || "");
       formData.append("discountType", data.discountType || "");
@@ -128,16 +128,15 @@ if(id){
           reset();
           setProduct(initialProduct);
           setErrorMessage(null);
-         setId("")
-         fetchProducts();
+          setId("");
+          fetchProducts();
         }
         Toast.fire({
           showCloseButton: true,
-          icon: 'success',
+          icon: "success",
           title: res.data.message,
-        })
+        });
       });
-
     } catch (error) {
       console.error("Error adding product:", error);
       setErrorMessage("An error occurred while adding the product.");
@@ -203,35 +202,69 @@ if(id){
         onSale: data.onSale,
         featured: data.featured,
       });
-      setId(data._id!)
+      setId(data._id!);
+    };
+    const handledeleteProduct = async (ProductId: string) => {
+      try {
+        const response = await ProductService.deleteProduct(ProductId);
+        // Ensure response.data is an array
+        if (response.data) {
+          Toast.fire({
+            showCloseButton: true,
+            icon: "success",
+            title: response.data.message,
+          });
+          fetchProducts();
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setProductsTable([]); // Reset to an empty array on error
+      }
     };
 
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(e.target.value);
+    };
+
+    const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        try {
+          const response = await ProductService.getProduct({
+            params: {
+              productName: searchTerm,
+              rating: 0,
+              onSale: false,
+              featured: false,
+            },
+          });
+          // Ensure response.data is an array
+          if (response.data.length > 0) {
+            setProductsTable(response.data);
+          }
+        } catch (error) {
+          console.error("Error fetching products:", error);
+          setProductsTable([]); // Reset to an empty array on error
+        }
+      }
+    };
     return (
       <>
         <div className="container">
           <div className="d-flex justify-content-start align-items-center border-bottom w-100">
-            <div className="w-75 d-flex justify-content-center align-items-center gap-3 py-2">
+            <div className="w-50 d-flex justify-content-center align-items-center gap-3 py-2">
               {/* Your tab buttons here */}
             </div>
-            <div className="w-25 d-flex justify-content-center align-items-center gap-3 py-2">
-              <input
-                className="form-control"
-                type="text"
-                placeholder="Search products..."
-                value={handleFilter.productName}
-                onChange={(e) =>
-                  setHandleFilter((preValue) => ({
-                    ...preValue,
-                    productName: e.target.value,
-                  }))
-                }
+            <div className="w-50 d-flex justify-content-end align-items-center gap-3 py-2">
+              <TextField
+                id="outlined-size-small"
+                placeholder="Search Product Name"
+                size="small"
+                value={searchTerm}
+                onChange={handleInputChange} // Handle input changes without triggering a search
+                onKeyPress={handleKeyPress} // Trigger search on Enter key press
               />
-              <button
-                className="btn btn-outline-primary"
-                onClick={() => fetchProducts()}
-              >
-                Search
-              </button>
             </div>
           </div>
           <div className="w-100">
@@ -263,7 +296,14 @@ if(id){
                             Edit
                           </button>
                         </td>
-                        <td>Delete</td>
+                        <td>
+                          <button
+                            className="btn btn-outline-danger"
+                            onClick={() => handledeleteProduct(data._id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -449,12 +489,7 @@ if(id){
             </div>
           </div>
           <button className="btn btn-success my-3" type="submit">
-           {id ? (
-            <>Update Product</>
-           )
-          :(
-            <>Save Product</>
-          )} 
+            {id ? <>Update Product</> : <>Save Product</>}
           </button>
         </form>
       </div>
