@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { HtmlHTMLAttributes, useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import "./styles.scss";
 import { ProductModel } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
@@ -125,6 +125,7 @@ const ManageProduct = () => {
 
       await ProductService.addProduct(formData).then((res) => {
         if (res.data) {
+          reset();
           setProduct(initialProduct);
           setErrorMessage(null);
           setId("");
@@ -135,7 +136,6 @@ const ManageProduct = () => {
           icon: "success",
           title: res.data.message,
         });
-        reset();
       });
     } catch (error) {
       console.error("Error adding product:", error);
@@ -143,6 +143,17 @@ const ManageProduct = () => {
     }
   };
   ///////////////////////////////////////get product/////////////////////////////
+  interface ProductModelGetProduct {
+    productName: string;
+    rating: number;
+    onSale: boolean;
+    featured: boolean;
+  }
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
   const [productsTable, setProductsTable] = useState<any[]>([]);
 
   const fetchProducts = async () => {
@@ -229,6 +240,7 @@ const ManageProduct = () => {
           }
         } catch (error) {
           console.error("Error fetching products:", error);
+          setProductsTable([]); // Reset to an empty array on error
         }
       }
     };
@@ -236,35 +248,37 @@ const ManageProduct = () => {
       <>
         <div className="container">
           <div className="d-flex justify-content-start align-items-center border-bottom w-100">
-            <div className="w-50 d-flex justify-content-center align-items-center gap-3 py-2"></div>
+            <div className="w-50 d-flex justify-content-center align-items-center gap-3 py-2">
+              {/* Your tab buttons here */}
+            </div>
             <div className="w-50 d-flex justify-content-end align-items-center gap-3 py-2">
               <TextField
                 id="outlined-size-small"
                 placeholder="Search Product Name"
                 size="small"
                 value={searchTerm}
-                onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
+                onChange={handleInputChange} // Handle input changes without triggering a search
+                onKeyPress={handleKeyPress} // Trigger search on Enter key press
               />
             </div>
           </div>
           <div className="w-100">
             {productsTable.length > 0 ? (
               <>
-                <table className="table table-hover">
-                  <thead>
-                    <tr>
-                      <th scope="col">Product Name</th>
-                      <th scope="col">Price</th>
-                      <th scope="col">Discount</th>
-                      <th scope="col">Handle</th>
-                      <th scope="col">Update</th>
-                      <th scope="col">Delete</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {productsTable.map((data) => (
-                      <tr key={data._id}>
+                {productsTable.map((data) => (
+                  <table className="table table-hover" key={data._id}>
+                    <thead>
+                      <tr>
+                        <th scope="col">Product Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Discount</th>
+                        <th scope="col">Handle</th>
+                        <th scope="col">Update</th>
+                        <th scope="col">Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
                         <th scope="row">{data.productName}</th>
                         <td>{data.price}</td>
                         <td>{data.discount}</td>
@@ -286,9 +300,9 @@ const ManageProduct = () => {
                           </button>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                ))}
               </>
             ) : (
               <>No Product Found</>
@@ -394,85 +408,79 @@ const ManageProduct = () => {
                   ))}
                 </div>
               </div>
-            </div>
-            <div className="col-xs-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4">
-              <TextField
-                className="mb-4"
-                id="outlined-select-currency-native"
-                select
-                label="Discount Type"
-                {...register("discountType", {
-                  required: "Discount type is required",
-                })}
-                SelectProps={{
-                  native: true,
-                }}
-                error={!!errors.discountType}
-                helperText={errors.discountType?.message}
-              >
-                <option value="Chinese New Year Discount">
-                  Chinese New Year Discount
-                </option>
-                <option value="Diwali Discount">Diwali Discount</option>
-                <option value="Christmas Discount">Christmas Discount</option>
-                <option value="Summer Discount">Summer Discount</option>
-                <option value="Winter Discount">Winter Discount</option>
-                <option value="Black Friday Discount">
-                  Black Friday Discount
-                </option>
-              </TextField>
-              <TextField
-                className="mb-4"
-                type="number"
-                label="Discount"
-                {...register("discount", {
-                  required: "Discount is required",
-                })}
-                error={!!errors.discount}
-                helperText={errors.discount?.message}
-              />
-              <TextField
-                className="mb-4"
-                type="number"
-                label="Price"
-                {...register("price", { required: "Price is required" })}
-                error={!!errors.price}
-                helperText={errors.price?.message}
-              />
-              <TextField
-                className="mb-4"
-                type="number"
-                label="Stock"
-                {...register("stock", { required: "Stock is required" })}
-                error={!!errors.stock}
-                helperText={errors.stock?.message}
-              />
-              <TextField
-                className="mb-4"
-                label="Category"
-                {...register("category", {
-                  required: "Category is required",
-                })}
-                error={!!errors.category}
-                helperText={errors.category?.message}
-              />
+              <div className="w-100 d-flex flex-wrap justify-content-start align-items-start gap-3 my-3">
+                <TextField
+                  id="outlined-select-currency-native"
+                  select
+                  label="Discount Type"
+                  {...register("discountType", {
+                    required: "Discount type is required",
+                  })}
+                  SelectProps={{
+                    native: true,
+                  }}
+                  error={!!errors.discountType}
+                  helperText={errors.discountType?.message}
+                >
+                  <option value="Chinese New Year Discount">
+                    Chinese New Year Discount
+                  </option>
+                  <option value="Diwali Discount">Diwali Discount</option>
+                  <option value="Christmas Discount">Christmas Discount</option>
+                  <option value="Summer Discount">Summer Discount</option>
+                  <option value="Winter Discount">Winter Discount</option>
+                  <option value="Black Friday Discount">
+                    Black Friday Discount
+                  </option>
+                </TextField>
+                <TextField
+                  type="number"
+                  label="Discount"
+                  {...register("discount", {
+                    required: "Discount is required",
+                  })}
+                  error={!!errors.discount}
+                  helperText={errors.discount?.message}
+                />
+                <TextField
+                  type="number"
+                  label="Price"
+                  {...register("price", { required: "Price is required" })}
+                  error={!!errors.price}
+                  helperText={errors.price?.message}
+                />
+                <TextField
+                  type="number"
+                  label="Stock"
+                  {...register("stock", { required: "Stock is required" })}
+                  error={!!errors.stock}
+                  helperText={errors.stock?.message}
+                />
+                <TextField
+                  label="Category"
+                  {...register("category", {
+                    required: "Category is required",
+                  })}
+                  error={!!errors.category}
+                  helperText={errors.category?.message}
+                />
 
-              <FormControlLabel
-                className="mb-4"
-                control={
-                  <Checkbox
-                    {...register("onSale")}
-                    checked={product.onSale}
-                    onChange={(e) =>
-                      setProduct((prevProduct) => ({
-                        ...prevProduct,
-                        onSale: e.target.checked,
-                      }))
-                    }
-                  />
-                }
-                label="On Sale"
-              />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      {...register("onSale")}
+                      checked={product.onSale}
+                      onChange={(e) =>
+                        setProduct((prevProduct) => ({
+                          ...prevProduct,
+                          onSale: e.target.checked,
+                        }))
+                      }
+                    />
+                  }
+                  label="On Sale"
+                />
+              </div>
             </div>
           </div>
           <button className="btn btn-success my-3" type="submit">
