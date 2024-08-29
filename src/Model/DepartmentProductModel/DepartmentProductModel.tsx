@@ -8,7 +8,6 @@ export interface ProductModel {
   stock: number;
   discount: number;
   discountType: string;
-  category: string;
   imageUrls: string[]; // Ensure this matches the type returned by your backend
   images: File[]; // Files array for local state
   singleImg: string;
@@ -17,4 +16,7 @@ export interface ProductModel {
   rating:number;
   onSale:boolean
   featured:boolean
+  organizationName:string;
+  categoryId: [];
+  organizationUserId:string;
 }

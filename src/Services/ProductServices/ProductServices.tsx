@@ -12,6 +12,13 @@ const ProductService = {
   deleteProduct: (productId:string) => {
     return axios.delete(`${baseUrl}product/delete-product/${productId}`);
   },
+  //  categoryName, userId
+  createCategories: (data:any) => {
+    return axios.post(`${baseUrl}product/category/add-category`, data);
+  },
+  getCategories: (userId:string) => {
+    return axios.get(`${baseUrl}product/category/get-category/?userId=${userId}`);
+  },
 };
 
 // let logoutTimer: NodeJS.Timeout;

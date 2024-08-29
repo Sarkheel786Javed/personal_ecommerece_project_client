@@ -4,7 +4,7 @@ import * as React from "react";
 import { ProductModel } from "../../Model/DepartmentProductModel/DepartmentProductModel";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ProductService } from "../../Services/ProductServices/ProductServices";
-
+import { motion } from "framer-motion";
 function TopprodectsbyFilter() {
   const SetInterval = () => {
     // Set a future date and time
@@ -76,7 +76,19 @@ function TopprodectsbyFilter() {
     <div className="w-100 mt-5">
       <div className="container-fluid">
         <div className="row">
-          <div className="col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-4 border border-warning card_cover p-3">
+          <motion.div className="col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-4 border border-warning card_cover p-3"
+          initial={{
+            opacity: 0,
+            y: -100,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0, // Slide in to its original position
+            transition: {
+              duration: 2, // Animation duration
+            },
+          }}
+          viewport={{ once: true }}>
             <div className=" card_header">
               <div className="">
                 Special
@@ -123,13 +135,30 @@ function TopprodectsbyFilter() {
                 style={{ width: "calc(28% - 6%)" }}
               ></div>
             </div>
-            <div className="">
+            <div
+            >
               <div className="text-center mt-3">Hurry Up! Offer ends in:</div>
               <SetInterval />
             </div>
-          </div>
+          </motion.div>
           <div className="col-xs-12 col-sm-12 col-md-6 col-lg-8 col-xl-8 col-xxl-8 pt-3">
-            <ProductComponent />
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 100,
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0, // Slide in to its original position
+                transition: {
+                  duration: 2, // Animation duration
+                },
+              }}
+              viewport={{ once: true }}
+            >
+               <ProductComponent />
+            </motion.div>
+           
           </div>
         </div>
       </div>
@@ -147,11 +176,11 @@ interface ProductModelGetProduct {
 }
 
 const ProductComponent: React.FC = () => {
-  const [tab, setTab] = useState("rating");
+  const [tab, setTab] = useState("onSale");
   const [handleFilter, setHandleFilter] = useState<ProductModelGetProduct>({
     productName: "",
-    rating: 1,
-    onSale: false,
+    rating: 0,
+    onSale: true,
     featured: false,
   });
   const [products, setProducts] = useState<ProductModel[]>([]);
@@ -159,14 +188,13 @@ const ProductComponent: React.FC = () => {
   const fetchProducts = async () => {
     try {
       const response = await ProductService.getProduct({
-          params: {
-            productName: handleFilter.productName,
-            rating: handleFilter.rating,
-            onSale: handleFilter.onSale,
-            featured: handleFilter.featured,
-          },
-        }
-      );
+        params: {
+          productName: handleFilter.productName,
+          rating: handleFilter.rating,
+          onSale: handleFilter.onSale,
+          featured: handleFilter.featured,
+        },
+      });
       // Ensure response.data is an array
       setProducts(response.data);
     } catch (error) {
@@ -175,24 +203,21 @@ const ProductComponent: React.FC = () => {
     }
   };
   const [searchQueryString] = useSearchParams();
-   const navigate = useNavigate()
-   
-   useEffect(() => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
     const a = searchQueryString.get("q");
     if (a) {
       setHandleFilter((preValue) => ({
         ...preValue,
         productName: a,
       }));
-      navigate("/")
+      navigate("/");
       fetchProducts();
-    }else{
-       fetchProducts();
+    } else {
+      fetchProducts();
     }
-   
-  }, [tab, handleFilter , searchQueryString.get("q")]);
-
- 
+  }, [tab, handleFilter, searchQueryString.get("q")]);
 
   const [hoveredImageIndex, setHoveredImageIndex] = useState<
     Record<number, string>

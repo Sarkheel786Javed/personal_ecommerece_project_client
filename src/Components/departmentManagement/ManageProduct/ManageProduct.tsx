@@ -1,11 +1,24 @@
-import { HtmlHTMLAttributes, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import "./styles.scss";
 import { ProductModel } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
-import { Checkbox, FormControlLabel, TextField } from "@mui/material";
+import {
+  Checkbox,
+  FormControlLabel,
+  TextField,
+} from "@mui/material";
+import { Theme, useTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Chip from '@mui/material/Chip';
 import { ProductService } from "../../../Services/ProductServices/ProductServices";
 import Dropzone, { Accept, FileRejection } from "react-dropzone";
 import Swal from "sweetalert2";
+import { useAuth } from "../../../app/createContextAuth/createContex";
 
 const initialProduct: ProductModel = {
   _id: "",
@@ -17,7 +30,6 @@ const initialProduct: ProductModel = {
   stock: 0,
   discount: 0,
   discountType: "Chinese New Year Discount",
-  category: "",
   imageUrls: [],
   images: [],
   singleImg: "",
@@ -26,9 +38,13 @@ const initialProduct: ProductModel = {
   rating: 0,
   onSale: false,
   featured: false,
+  organizationName: "",
+  categoryId: [],
+  organizationUserId: "",
 };
 
 const ManageProduct = () => {
+  const [auth] = useAuth();
   const Toast = Swal.mixin({
     toast: true,
     position: "top-end",
@@ -107,18 +123,21 @@ const ManageProduct = () => {
       }
 
       formData.append("productName", data.productName || "");
-      formData.append("category", data.category || "");
-      formData.append("discountType", data.discountType || "");
+      formData.append("categoryId", (data.categoryId ?? "").toString());
       formData.append("discount", (data.discount ?? 0).toString());
       formData.append("stock", (data.stock ?? 0).toString());
       formData.append("price", (data.price ?? 0).toString());
       formData.append("gender", data.gender || "");
       formData.append("size", data.size || "");
+      formData.append("discountType", data.discountType || "");
       formData.append("description", data.description || "");
       formData.append("rating", (data.rating ?? 0).toString());
       formData.append("onSale", (data.onSale ?? false).toString());
       formData.append("featured", (data.featured ?? false).toString());
-
+      formData.append("organizationName", (auth.Organization ?? "").toString());
+      formData.append("organizationUserId", (auth._id ?? "").toString());
+      const categoryIds = Array.isArray(selectedCategories) ? data.categoryId.join(",") : "";
+      formData.append("categoryId", categoryIds);
       product.images.forEach((file) => {
         formData.append("images", file);
       });
@@ -143,19 +162,32 @@ const ManageProduct = () => {
     }
   };
   ///////////////////////////////////////get product/////////////////////////////
-  interface ProductModelGetProduct {
-    productName: string;
-    rating: number;
-    onSale: boolean;
-    featured: boolean;
-  }
 
   useEffect(() => {
     fetchProducts();
+    getCategories();
   }, []);
 
   const [productsTable, setProductsTable] = useState<any[]>([]);
+  interface Category {
+    _id: string;
+    categoryName: string;
+    userId: string;
+    organization: string;
+  }
+  const [categories, setCategories] = useState<Category[]>([]);
 
+  const getCategories = async () => {
+    try {
+      const response = await ProductService.getCategories("");
+      // Ensure response.data is an array
+      if (response.data) {
+        setCategories(response.data.categories);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
   const fetchProducts = async () => {
     try {
       const response = await ProductService.getProduct({
@@ -175,9 +207,16 @@ const ManageProduct = () => {
       setProductsTable([]); // Reset to an empty array on error
     }
   };
+ 
   const ProductDetail = () => {
     const setValues = (data: ProductModel) => {
       setProduct(data);
+    
+      const selectedCategoryNames = (categories as Category[])
+      .filter((cat) => (data.categoryId as string[]).includes(cat._id))
+      .map((cat) => cat.categoryName);
+    
+    
       reset({
         productName: data.productName,
         description: data.description,
@@ -187,7 +226,6 @@ const ManageProduct = () => {
         stock: data.stock,
         discount: data.discount,
         discountType: data.discountType,
-        category: data.category,
         imageUrls: data.imageUrls,
         images: data.images,
         singleImg: data.singleImg,
@@ -196,9 +234,18 @@ const ManageProduct = () => {
         rating: data.rating,
         onSale: data.onSale,
         featured: data.featured,
+        organizationName: data.organizationName,
+        categoryId: data.categoryId, // Ensure category IDs are set
+        organizationUserId: data.organizationUserId,
       });
+    
       setId(data._id!);
+    
+      // Set selected categories based on the loaded product data
+      setSelectedCategories(selectedCategoryNames);
     };
+    
+
     const handledeleteProduct = async (ProductId: string) => {
       try {
         const response = await ProductService.deleteProduct(ProductId);
@@ -265,20 +312,20 @@ const ManageProduct = () => {
           <div className="w-100">
             {productsTable.length > 0 ? (
               <>
-                {productsTable.map((data) => (
-                  <table className="table table-hover" key={data._id}>
-                    <thead>
-                      <tr>
-                        <th scope="col">Product Name</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Discount</th>
-                        <th scope="col">Handle</th>
-                        <th scope="col">Update</th>
-                        <th scope="col">Delete</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
+                <table className="table table-hover">
+                  <thead>
+                    <tr>
+                      <th scope="col">Product Name</th>
+                      <th scope="col">Price</th>
+                      <th scope="col">Discount</th>
+                      <th scope="col">Handle</th>
+                      <th scope="col">Update</th>
+                      <th scope="col">Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productsTable.map((data) => (
+                      <tr key={data._id}>
                         <th scope="row">{data.productName}</th>
                         <td>{data.price}</td>
                         <td>{data.discount}</td>
@@ -300,9 +347,9 @@ const ManageProduct = () => {
                           </button>
                         </td>
                       </tr>
-                    </tbody>
-                  </table>
-                ))}
+                    ))}
+                  </tbody>
+                </table>
               </>
             ) : (
               <>No Product Found</>
@@ -310,6 +357,40 @@ const ManageProduct = () => {
           </div>
         </div>
       </>
+    );
+  };
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+
+
+function getStyles(categoryName: string, selectedCategories: readonly string[], theme: Theme) {
+  return {
+    fontWeight:
+      selectedCategories.indexOf(categoryName) === -1
+        ? theme.typography.fontWeightRegular
+        : theme.typography.fontWeightMedium,
+  };
+}
+
+  const theme = useTheme();
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const handleChange = (event: SelectChangeEvent<typeof selectedCategories>) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedCategories(
+      typeof value === 'string' ? value.split(',') : value,
     );
   };
 
@@ -364,9 +445,14 @@ const ManageProduct = () => {
                       {isDragActive ? (
                         <p>Drop the files here ...</p>
                       ) : (
-                        <p>
-                          Drag 'n' drop some files here, or click to select
-                          files
+                        <p className=" d-flex justify-content-center align-items-center">
+                          <div className="text-center">
+                            <div> Drag 'n' drop some files here,</div>
+                            <div className="">or</div>
+                            <button type="button" className="btn btn-outline-primary mt-3">
+                              Upload Images
+                            </button>
+                          </div>
                         </p>
                       )}
                     </div>
@@ -456,15 +542,46 @@ const ManageProduct = () => {
                   error={!!errors.stock}
                   helperText={errors.stock?.message}
                 />
-                <TextField
-                  label="Category"
-                  {...register("category", {
-                    required: "Category is required",
-                  })}
-                  error={!!errors.category}
-                  helperText={errors.category?.message}
-                />
-
+                <FormControl sx={{ m: 1, width: 300 }}>
+                  <InputLabel id="category-multiple-chip-label">
+                    Categories
+                  </InputLabel>
+                  <Select
+                    labelId="category-multiple-chip-label"
+                    id="category-multiple-chip"
+                    multiple
+                    value={selectedCategories}
+                    onChange={handleChange}
+                    input={
+                      <OutlinedInput
+                        id="select-multiple-chip"
+                        label="Categories"
+                      />
+                    }
+                    renderValue={(selected) => (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {selected.map((value) => (
+                          <Chip key={value} label={value} />
+                        ))}
+                      </Box>
+                    )}
+                    MenuProps={MenuProps}
+                  >
+                    {categories.map((category) => (
+                      <MenuItem
+                        key={category._id}
+                        value={category.categoryName}
+                        style={getStyles(
+                          category.categoryName,
+                          selectedCategories,
+                          theme
+                        )}
+                      >
+                        {category.categoryName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 <FormControlLabel
                   control={
                     <Checkbox
