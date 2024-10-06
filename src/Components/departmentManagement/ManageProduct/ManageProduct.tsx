@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import "./styles.scss";
-import { ProductModel } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
+import { Category, ProductModel } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
 import {
   Checkbox,
   FormControlLabel,
@@ -19,68 +19,278 @@ import { ProductService } from "../../../Services/ProductServices/ProductService
 import Dropzone, { Accept, FileRejection } from "react-dropzone";
 import Swal from "sweetalert2";
 import { useAuth } from "../../../app/createContextAuth/createContex";
+import CommonModal from "../../CommonModal/CommonModal";
 
-const initialProduct: ProductModel = {
-  _id: "",
-  productName: "",
-  description: "",
-  size: "M",
-  gender: "Unisex",
-  price: 0,
-  stock: 0,
-  discount: 0,
-  discountType: "Chinese New Year Discount",
-  imageUrls: [],
-  images: [],
-  singleImg: "",
-  singleImgName: "",
-  hover: 0,
-  rating: 0,
-  onSale: false,
-  featured: false,
-  organizationName: "",
-  categoryId: [],
-  organizationUserId: "",
-};
+const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 2000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
+  },
+});
 
 const ManageProduct = () => {
-  const [auth] = useAuth();
-  const Toast = Swal.mixin({
-    toast: true,
-    position: "top-end",
-    showConfirmButton: false,
-    timer: 2000,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-      toast.onmouseenter = Swal.stopTimer;
-      toast.onmouseleave = Swal.resumeTimer;
-    },
-  });
+  const initialProduct: ProductModel = {
+    _id: "0",
+    productName: "",
+    description: "",
+    size: "M",
+    gender: "Unisex",
+    price: 0,
+    stock: 0,
+    discount: 0,
+    discountType: "Chinese New Year Discount",
+    imageUrls: [],
+    images: [],
+    singleImg: "",
+    singleImgName: "",
+    hover: 0,
+    rating: 0,
+    onSale: false,
+    featured: false,
+    organizationName: "",
+    categoryId: [],
+    organizationUserId: "",
+  };
+
+  const [productsTable, setProductsTable] = useState<ProductModel[]>([]);
+
   useEffect(() => {
-    fetchProducts();
+    getAllProducts();
   }, []);
 
-  const [product, setProduct] = useState<ProductModel>(initialProduct);
+  const getAllProducts = async () => {
+    try {
+      const response = await ProductService.getProduct({
+        params: {
+          productName: "",
+          rating: 0,
+          onSale: false,
+          featured: false,
+        },
+      });
+      if (response.data) {
+        setProductsTable(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
+  const [modalShow, setModalShow] = useState<boolean>(false);
+
+  const handledeleteProduct = async (ProductId: string) => {
+    try {
+      const response = await ProductService.deleteProduct(ProductId);
+      if (response.data) {
+        Toast.fire({
+          showCloseButton: true,
+          icon: "success",
+          title: response.data.message,
+        });
+        getAllProducts();
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      setProductsTable([]); // Optionally, handle error state differently
+    }
+  };
+
+  const [editValues, setEditValues] = useState<ProductModel>(initialProduct);
+
+  const onEdit = (product: ProductModel) => {
+    setEditValues(product);
+    setModalShow(true);
+  };
+
+  // Define props interface for TableComponent
+  interface TableComponentProps {
+    data: ProductModel[];
+  }
+
+  const TableComponent: React.FC<TableComponentProps> = ({ data }) => {
+    console.log("data============>", data);
+    return (
+      <div className="w-100">
+        {data && data.length > 0 ? (
+          <table className="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Product Name</th>
+                <th scope="col">Price</th>
+                <th scope="col">Discount</th>
+                {/* <th scope="col">Handle</th> */}
+                <th scope="col">Images</th>
+                <th scope="col">Update</th>
+                <th scope="col">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((row: ProductModel) => (
+                <tr key={row._id}>
+                  <th scope="row">{row.productName}</th>
+                  <td>{row.price}</td>
+                  <td>{row.discount}</td>
+                  <td>{row.images.length}</td>
+                  <td>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => onEdit(row)}
+                    >
+                      Edit
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-outline-danger"
+                      onClick={() => handledeleteProduct(row._id!)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No Product Found</p>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="container-fluid">
+      <div className="d-flex justify-content-end align-items-center py-5">
+        <input
+          type="text"
+          className="input_table"
+        // Add value and onChange handlers as needed
+        />
+        <button
+          type="button"
+          className="ms-2 btn btn-warning"
+          onClick={() => setModalShow(true)}
+        >
+          Add New Product
+        </button>
+      </div>
+      <div className="">
+        <TableComponent data={productsTable} />
+      </div>
+      {modalShow && (
+        <CommonModal
+          show={modalShow}
+          getAllProductsProp={getAllProducts}
+          editvaluesprop={editValues}
+          modalnameprop="DepartmentProduct"
+          onHide={() => setModalShow(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default ManageProduct;
+
+interface AddDepartmentProductProps {
+  editvaluesprop: ProductModel;
+  getAllProductsProp: () => void;
+  onHide: () => void;
+}
+
+export const AddDepartmentProduct: React.FC<AddDepartmentProductProps> = (props) => {
+  const [existingImageUrls, setExistingImageUrls] = useState<any[]>([]);
+  const [images, setImages] = useState<File[]>([]);
+  const [deletedImageUrls, setDeletedImageUrls] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const maxTotalFiles = 6;
+  const initialProduct: ProductModel = {
+    _id: "",
+    productName: "",
+    description: "",
+    size: "M",
+    gender: "Unisex",
+    price: 0,
+    stock: 0,
+    discount: 0,
+    discountType: "Chinese New Year Discount",
+    imageUrls: [],
+    images: [],
+    singleImg: "",
+    singleImgName: "",
+    hover: 0,
+    rating: 0,
+    onSale: false,
+    featured: false,
+    organizationName: "",
+    categoryId: [],
+    organizationUserId: "",
+  };
 
   const {
     register,
     handleSubmit,
+    setValue,
     reset,
     formState: { errors },
   } = useForm<ProductModel>({
     defaultValues: initialProduct,
   });
 
+  const theme = useTheme();
+  useEffect(() => {
+    getCategories();
+    if (props.editvaluesprop._id && props.editvaluesprop._id !== "0") {
+      setValue("_id", props.editvaluesprop._id);
+      setValue("productName", props.editvaluesprop.productName);
+      setValue("description", props.editvaluesprop.description);
+      setValue("size", props.editvaluesprop.size);
+      setValue("gender", props.editvaluesprop.gender);
+      setValue("price", props.editvaluesprop.price);
+      setValue("stock", props.editvaluesprop.stock);
+      setValue("discount", props.editvaluesprop.discount);
+      setValue("discountType", props.editvaluesprop.discountType);
+      setValue("hover", props.editvaluesprop.hover);
+      setValue("rating", props.editvaluesprop.rating);
+      setValue("onSale", props.editvaluesprop.onSale);
+      setValue("featured", props.editvaluesprop.featured);
+      setValue("organizationName", props.editvaluesprop.organizationName);
+      setValue("organizationUserId", props.editvaluesprop.organizationUserId);
+      setValue("categoryId", props.editvaluesprop.categoryId);
+      setExistingImageUrls(props.editvaluesprop?.images || []);
+      setSelectedCategories(props.editvaluesprop.categoryId.map(id => String(id)));
+    }
+  }, [props.editvaluesprop]);
+
+  const getCategories = async () => {
+    try {
+      const response = await ProductService.getCategories("");
+      if (response.data) {
+        setCategories(response.data.categories);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  // Dropzone accept configurations
   const accept: Accept = {
     "image/jpeg": [".jpeg", ".jpg"],
     "image/png": [".png"],
     "image/gif": [".gif"],
   };
 
+  const maxTotalFiles = 6;
+
+  // Handle file drops
   const onDrop = (acceptedFiles: File[], fileRejections: FileRejection[]) => {
-    const remainingSlots = maxTotalFiles - product.images.length;
+    const remainingSlots = maxTotalFiles - images.length;
 
     if (fileRejections.length > 0) {
       const rejectionMessages = fileRejections.map((rejection) => {
@@ -98,516 +308,344 @@ const ManageProduct = () => {
     }
 
     if (acceptedFiles.length > 0) {
-      setProduct((prevProduct) => ({
-        ...prevProduct,
-        images: [...prevProduct.images, ...acceptedFiles],
-      }));
+      setImages((prevImages) => [...prevImages, ...acceptedFiles]);
     }
   };
 
+  // Handle deletion of new images
   const handleImageDelete = (index: number) => {
-    setProduct((prevProduct) => {
-      const updatedImages = prevProduct.images.filter((_, i) => i !== index);
-      return {
-        ...prevProduct,
-        images: updatedImages,
-      };
-    });
-  };
-  const [id, setId] = useState("");
-  const onSubmit: SubmitHandler<ProductModel> = async (data) => {
-    try {
-      const formData = new FormData();
-      if (id) {
-        formData.append("_id", id);
-      }
-
-      formData.append("productName", data.productName || "");
-      formData.append("categoryId", (data.categoryId ?? "").toString());
-      formData.append("discount", (data.discount ?? 0).toString());
-      formData.append("stock", (data.stock ?? 0).toString());
-      formData.append("price", (data.price ?? 0).toString());
-      formData.append("gender", data.gender || "");
-      formData.append("size", data.size || "");
-      formData.append("discountType", data.discountType || "");
-      formData.append("description", data.description || "");
-      formData.append("rating", (data.rating ?? 0).toString());
-      formData.append("onSale", (data.onSale ?? false).toString());
-      formData.append("featured", (data.featured ?? false).toString());
-      formData.append("organizationName", (auth.Organization ?? "").toString());
-      formData.append("organizationUserId", (auth._id ?? "").toString());
-      const categoryIds = Array.isArray(selectedCategories) ? data.categoryId.join(",") : "";
-      formData.append("categoryId", categoryIds);
-      product.images.forEach((file) => {
-        formData.append("images", file);
-      });
-
-      await ProductService.addProduct(formData).then((res) => {
-        if (res.data) {
-          reset();
-          setProduct(initialProduct);
-          setErrorMessage(null);
-          setId("");
-          fetchProducts();
-        }
-        Toast.fire({
-          showCloseButton: true,
-          icon: "success",
-          title: res.data.message,
-        });
-      });
-    } catch (error) {
-      console.error("Error adding product:", error);
-      setErrorMessage("An error occurred while adding the product.");
-    }
-  };
-  ///////////////////////////////////////get product/////////////////////////////
-
-  useEffect(() => {
-    fetchProducts();
-    getCategories();
-  }, []);
-
-  const [productsTable, setProductsTable] = useState<any[]>([]);
-  interface Category {
-    _id: string;
-    categoryName: string;
-    userId: string;
-    organization: string;
-  }
-  const [categories, setCategories] = useState<Category[]>([]);
-
-  const getCategories = async () => {
-    try {
-      const response = await ProductService.getCategories("");
-      // Ensure response.data is an array
-      if (response.data) {
-        setCategories(response.data.categories);
-      }
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  };
-  const fetchProducts = async () => {
-    try {
-      const response = await ProductService.getProduct({
-        params: {
-          productName: "",
-          rating: 0,
-          onSale: false,
-          featured: false,
-        },
-      });
-      // Ensure response.data is an array
-      if (response.data.length > 0) {
-        setProductsTable(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      setProductsTable([]); // Reset to an empty array on error
-    }
-  };
- 
-  const ProductDetail = () => {
-    const setValues = (data: ProductModel) => {
-      setProduct(data);
-    
-      const selectedCategoryNames = (categories as Category[])
-      .filter((cat) => (data.categoryId as string[]).includes(cat._id))
-      .map((cat) => cat.categoryName);
-    
-    
-      reset({
-        productName: data.productName,
-        description: data.description,
-        size: data.size,
-        gender: data.gender,
-        price: data.price,
-        stock: data.stock,
-        discount: data.discount,
-        discountType: data.discountType,
-        imageUrls: data.imageUrls,
-        images: data.images,
-        singleImg: data.singleImg,
-        singleImgName: data.singleImgName,
-        hover: data.hover,
-        rating: data.rating,
-        onSale: data.onSale,
-        featured: data.featured,
-        organizationName: data.organizationName,
-        categoryId: data.categoryId, // Ensure category IDs are set
-        organizationUserId: data.organizationUserId,
-      });
-    
-      setId(data._id!);
-    
-      // Set selected categories based on the loaded product data
-      setSelectedCategories(selectedCategoryNames);
-    };
-    
-
-    const handledeleteProduct = async (ProductId: string) => {
-      try {
-        const response = await ProductService.deleteProduct(ProductId);
-        // Ensure response.data is an array
-        if (response.data) {
-          Toast.fire({
-            showCloseButton: true,
-            icon: "success",
-            title: response.data.message,
-          });
-          fetchProducts();
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        setProductsTable([]); // Reset to an empty array on error
-      }
-    };
-
-    const [searchTerm, setSearchTerm] = useState("");
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(e.target.value);
-    };
-
-    const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        try {
-          const response = await ProductService.getProduct({
-            params: {
-              productName: searchTerm,
-              rating: 0,
-              onSale: false,
-              featured: false,
-            },
-          });
-          // Ensure response.data is an array
-          if (response.data.length > 0) {
-            setProductsTable(response.data);
-          }
-        } catch (error) {
-          console.error("Error fetching products:", error);
-          setProductsTable([]); // Reset to an empty array on error
-        }
-      }
-    };
-    return (
-      <>
-        <div className="container">
-          <div className="d-flex justify-content-start align-items-center border-bottom w-100">
-            <div className="w-50 d-flex justify-content-center align-items-center gap-3 py-2">
-              {/* Your tab buttons here */}
-            </div>
-            <div className="w-50 d-flex justify-content-end align-items-center gap-3 py-2">
-              <TextField
-                id="outlined-size-small"
-                placeholder="Search Product Name"
-                size="small"
-                value={searchTerm}
-                onChange={handleInputChange} // Handle input changes without triggering a search
-                onKeyPress={handleKeyPress} // Trigger search on Enter key press
-              />
-            </div>
-          </div>
-          <div className="w-100">
-            {productsTable.length > 0 ? (
-              <>
-                <table className="table table-hover">
-                  <thead>
-                    <tr>
-                      <th scope="col">Product Name</th>
-                      <th scope="col">Price</th>
-                      <th scope="col">Discount</th>
-                      <th scope="col">Handle</th>
-                      <th scope="col">Update</th>
-                      <th scope="col">Delete</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {productsTable.map((data) => (
-                      <tr key={data._id}>
-                        <th scope="row">{data.productName}</th>
-                        <td>{data.price}</td>
-                        <td>{data.discount}</td>
-                        <td></td>
-                        <td>
-                          <button
-                            className="btn btn-primary"
-                            onClick={() => setValues(data)}
-                          >
-                            Edit
-                          </button>
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() => handledeleteProduct(data._id)}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </>
-            ) : (
-              <>No Product Found</>
-            )}
-          </div>
-        </div>
-      </>
-    );
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
   };
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
-
-
-function getStyles(categoryName: string, selectedCategories: readonly string[], theme: Theme) {
-  return {
-    fontWeight:
-      selectedCategories.indexOf(categoryName) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
+  // Handle deletion of existing images
+  const handleExistingImageDelete = (index: number) => {
+    const urlToDelete = existingImageUrls[index];
+    setDeletedImageUrls((prev) => [...prev, urlToDelete]);
+    setExistingImageUrls((prevUrls) => prevUrls.filter((_, i) => i !== index));
   };
-}
-
-  const theme = useTheme();
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const handleChange = (event: SelectChangeEvent<typeof selectedCategories>) => {
     const {
       target: { value },
     } = event;
     setSelectedCategories(
-      typeof value === 'string' ? value.split(',') : value,
+      typeof value === "string" ? value.split(",") : value,
     );
   };
 
+
+  // Helper function for styling categories
+  function getStyles(categoryName: string, selectedCategories: readonly string[], theme: Theme) {
+    return {
+      fontWeight:
+        selectedCategories.indexOf(categoryName) === -1
+          ? theme.typography.fontWeightRegular
+          : theme.typography.fontWeightMedium,
+    };
+  }
+
+  // Form submission handler
+  const [auth] = useAuth()
+  const onSubmit: SubmitHandler<ProductModel> = async (data) => {
+    try {
+      const formData = new FormData();
+      if (data._id) {
+        formData.append("_id", data._id);
+      }
+
+      formData.append("productName", data.productName || "");
+      formData.append("description", data.description || "");
+      formData.append("size", data.size || "");
+      formData.append("gender", data.gender || "");
+      formData.append("price", (data.price ?? 0).toString());
+      formData.append("stock", (data.stock ?? 0).toString());
+      formData.append("discount", (data.discount ?? 0).toString());
+      formData.append("discountType", data.discountType || "");
+      formData.append("hover", (data.hover ?? 0).toString());
+      formData.append("rating", (data.rating ?? 0).toString());
+      formData.append("onSale", (data.onSale ?? false).toString());
+      formData.append("featured", (data.featured ?? false).toString());
+      formData.append("organizationName", (auth.Organization ?? "").toString());
+      formData.append("organizationUserId", (auth._id ?? "").toString());
+
+      // Append existing image URLs to retain
+      existingImageUrls.forEach((url) => formData.append("existingImageUrls", url));
+
+      // Append image URLs marked for deletion
+      deletedImageUrls.forEach((url) => formData.append("deletedImageUrls", url));
+
+      images.forEach((image) => {
+        formData.append('images', image); // Assuming images is an array of File objects
+      });
+
+      // Append selected category IDs
+      // Append selected category IDs
+      selectedCategories.forEach((id) => {
+        formData.append("categoryId", id);
+      });
+
+      // Make the API call to add or update the product
+      await ProductService.addProduct(formData).then((res) => {
+        Toast.fire({
+          showCloseButton: true,
+          icon: "success",
+          title: res.data.message,
+        });
+        reset()
+        props.onHide();
+        props.getAllProductsProp();
+      });
+    } catch (error) {
+      console.error("Error adding/updating product:", error);
+      setErrorMessage("An error occurred while processing the product.");
+    }
+  };
   return (
-    <div className="w-100">
-      <h1 className="mx-5 mt-3">Add New Product</h1>
-      <div className="container">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="row border rounded mt-5">
-            <div className="col-12 ">
-              <h2>General Information</h2>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="container-fluid">
+        <div className="row border rounded mt-5">
+          <div className="col-12">
+            <h2>General Information</h2>
+          </div>
+          <div className="col-lg-8">
+            {/* Product Name */}
+            <div className="input-group my-3">
+              <TextField
+                id="outlined-required"
+                type="text"
+                label="Product Name"
+                {...register("productName", {
+                  required: "Product name is required",
+                })}
+                error={!!errors.productName}
+                helperText={errors.productName?.message}
+                fullWidth
+              />
             </div>
-            <div className="col-xs-12 col-sm-12 col-md-12 col-lg-8 col-xl-8 col-xxl-8">
-              <div className="input-group my-3">
-                <TextField
-                  id="outlined-required"
-                  type="text"
-                  label="Product Name"
-                  {...register("productName", {
-                    required: "Product name is required",
-                  })}
-                  error={!!errors.productName}
-                  helperText={errors.productName?.message}
-                />
-              </div>
-              <div className="input-group my-3">
-                <TextField
-                  id="outlined-multiline-static"
-                  fullWidth
-                  label="Description"
-                  multiline
-                  rows={4}
-                  {...register("description", {
-                    required: "Description is required",
-                  })}
-                  error={!!errors.description}
-                  helperText={errors.description?.message}
-                />
-              </div>
-              <div className="w-100 mt-4">
-                <h2>Upload Images</h2>
-                <Dropzone onDrop={onDrop} accept={accept}>
-                  {({ getRootProps, getInputProps, isDragActive }) => (
-                    <div
-                      {...getRootProps({
-                        className: isDragActive
-                          ? "dropzone active"
-                          : "dropzone",
-                      })}
-                    >
-                      <input {...getInputProps()} />
-                      {isDragActive ? (
-                        <p>Drop the files here ...</p>
-                      ) : (
-                        <p className=" d-flex justify-content-center align-items-center">
-                          <div className="text-center">
-                            <div> Drag 'n' drop some files here,</div>
-                            <div className="">or</div>
-                            <button type="button" className="btn btn-outline-primary mt-3">
-                              Upload Images
-                            </button>
-                          </div>
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </Dropzone>
 
-                {errorMessage && (
-                  <div className="text-danger mt-2">{errorMessage}</div>
+            {/* Description */}
+            <div className="input-group my-3">
+              <TextField
+                id="outlined-multiline-static"
+                fullWidth
+                label="Description"
+                multiline
+                rows={4}
+                {...register("description", {
+                  required: "Description is required",
+                })}
+                error={!!errors.description}
+                helperText={errors.description?.message}
+              />
+            </div>
+
+            {/* Upload Images */}
+            <div className="w-100 mt-4">
+              <h2>Upload Images</h2>
+              <Dropzone onDrop={onDrop} accept={accept}>
+                {({ getRootProps, getInputProps, isDragActive }) => (
+                  <div
+                    {...getRootProps({
+                      className: isDragActive ? "dropzone active" : "dropzone",
+                    })}
+                    style={{
+                      border: "2px dashed #cccccc",
+                      padding: "20px",
+                      textAlign: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input {...getInputProps()} />
+                    {isDragActive ? (
+                      <p>Drop the files here ...</p>
+                    ) : (
+                      <p>
+                        Drag 'n' drop some files here, or{" "}
+                        <button type="button" className="btn btn-outline-primary mt-3">
+                          Upload Images
+                        </button>
+                      </p>
+                    )}
+                  </div>
                 )}
+              </Dropzone>
 
-                <div className="row my-3">
-                  {product.images.map((image, index) => (
-                    <div
-                      key={index}
-                      className="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-3 col-xxl-3 mx-auto"
-                    >
-                      <div className="card text-center">
-                        <img
-                          src={
-                            typeof image === "string"
-                              ? image
-                              : URL.createObjectURL(image)
-                          }
-                          alt={`product-${index}`}
-                          className="card-img-top img-fluid"
-                        />
+              {errorMessage && <div className="text-danger mt-2">{errorMessage}</div>}
 
-                        <div className="card-body">
-                          <button
-                            type="button"
-                            className="btn btn-danger"
-                            onClick={() => handleImageDelete(index)}
-                          >
-                            Delete
-                          </button>
-                        </div>
+              {/* Display Existing and New Images */}
+              <div className="row my-3">
+                {/* Existing Images */}
+                {existingImageUrls.map((url, index) => (
+                  <div
+                    key={`existing-${index}`}
+                    className="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-3 col-xxl-3 mb-3"
+                  >
+                    <div className="card text-center">
+                      <img
+                        src={url}
+                        alt={`existing-product-${index}`}
+                        className="card-img-top img-fluid"
+                      />
+                      <div className="card-body">
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          onClick={() => handleExistingImageDelete(index)}
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-              <div className="w-100 d-flex flex-wrap justify-content-start align-items-start gap-3 my-3">
-                <TextField
-                  id="outlined-select-currency-native"
-                  select
-                  label="Discount Type"
-                  {...register("discountType", {
-                    required: "Discount type is required",
-                  })}
-                  SelectProps={{
-                    native: true,
-                  }}
-                  error={!!errors.discountType}
-                  helperText={errors.discountType?.message}
-                >
-                  <option value="Chinese New Year Discount">
-                    Chinese New Year Discount
-                  </option>
-                  <option value="Diwali Discount">Diwali Discount</option>
-                  <option value="Christmas Discount">Christmas Discount</option>
-                  <option value="Summer Discount">Summer Discount</option>
-                  <option value="Winter Discount">Winter Discount</option>
-                  <option value="Black Friday Discount">
-                    Black Friday Discount
-                  </option>
-                </TextField>
-                <TextField
-                  type="number"
-                  label="Discount"
-                  {...register("discount", {
-                    required: "Discount is required",
-                  })}
-                  error={!!errors.discount}
-                  helperText={errors.discount?.message}
-                />
-                <TextField
-                  type="number"
-                  label="Price"
-                  {...register("price", { required: "Price is required" })}
-                  error={!!errors.price}
-                  helperText={errors.price?.message}
-                />
-                <TextField
-                  type="number"
-                  label="Stock"
-                  {...register("stock", { required: "Stock is required" })}
-                  error={!!errors.stock}
-                  helperText={errors.stock?.message}
-                />
-                <FormControl sx={{ m: 1, width: 300 }}>
-                  <InputLabel id="category-multiple-chip-label">
-                    Categories
-                  </InputLabel>
-                  <Select
-                    labelId="category-multiple-chip-label"
-                    id="category-multiple-chip"
-                    multiple
-                    value={selectedCategories}
-                    onChange={handleChange}
-                    input={
-                      <OutlinedInput
-                        id="select-multiple-chip"
-                        label="Categories"
-                      />
-                    }
-                    renderValue={(selected) => (
-                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                        {selected.map((value) => (
-                          <Chip key={value} label={value} />
-                        ))}
-                      </Box>
-                    )}
-                    MenuProps={MenuProps}
+                  </div>
+                ))}
+
+                {/* New Images */}
+                {images.map((image, index) => (
+                  <div
+                    key={`new-${index}`}
+                    className="col-xs-12 col-sm-12 col-md-4 col-lg-4 col-xl-3 col-xxl-3 mb-3"
                   >
-                    {categories.map((category) => (
-                      <MenuItem
-                        key={category._id}
-                        value={category.categoryName}
-                        style={getStyles(
-                          category.categoryName,
-                          selectedCategories,
-                          theme
-                        )}
-                      >
-                        {category.categoryName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      {...register("onSale")}
-                      checked={product.onSale}
-                      onChange={(e) =>
-                        setProduct((prevProduct) => ({
-                          ...prevProduct,
-                          onSale: e.target.checked,
-                        }))
-                      }
-                    />
-                  }
-                  label="On Sale"
-                />
+                    <div className="card text-center">
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt={`new-product-${index}`}
+                        className="card-img-top img-fluid"
+                      />
+                      <div className="card-body">
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          onClick={() => handleImageDelete(index)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/* Additional Product Details */}
+            <div className="w-100 d-flex flex-wrap justify-content-start align-items-start gap-3 my-3">
+              {/* Discount Type */}
+              <FormControl sx={{ m: 1, width: 300 }}>
+                <InputLabel id="category-multiple-chip-label">Categories</InputLabel>
+                <Select
+                  labelId="category-multiple-chip-label"
+                  id="category-multiple-chip"
+                  multiple
+                  value={selectedCategories}
+                  onChange={handleChange}
+                  input={<OutlinedInput id="select-multiple-chip" label="Categories" />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {selected.map((id) => {
+                        const category = categories.find((cat) => cat._id === id);
+                        return category ? <Chip key={id} label={category.categoryName} /> : null;
+                      })}
+                    </Box>
+                  )}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 48 * 4.5 + 8,
+                        width: 250,
+                      },
+                    },
+                  }}
+                >
+                  {categories.map((category) => (
+                    <MenuItem
+                      key={category._id}
+                      value={category._id}
+                      style={getStyles(category.categoryName, selectedCategories, theme)}
+                    >
+                      {category.categoryName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+
+              {/* Discount Type */}
+              <TextField
+                id="outlined-select-currency-native"
+                select
+                label="Discount Type"
+                {...register("discountType", {
+                  required: "Discount type is required",
+                })}
+                SelectProps={{
+                  native: true,
+                }}
+                error={!!errors.discountType}
+                helperText={errors.discountType?.message}
+                fullWidth
+              >
+                <option value="Chinese New Year Discount">Chinese New Year Discount</option>
+                <option value="Diwali Discount">Diwali Discount</option>
+                <option value="Christmas Discount">Christmas Discount</option>
+                <option value="Summer Discount">Summer Discount</option>
+                <option value="Winter Discount">Winter Discount</option>
+                <option value="Black Friday Discount">Black Friday Discount</option>
+              </TextField>
+
+              {/* Discount */}
+              <TextField
+                type="number"
+                label="Discount"
+                {...register("discount", {
+                  required: "Discount is required",
+                })}
+                error={!!errors.discount}
+                helperText={errors.discount?.message}
+                fullWidth
+              />
+
+              {/* Price */}
+              <TextField
+                type="number"
+                label="Price"
+                {...register("price", { required: "Price is required" })}
+                error={!!errors.price}
+                helperText={errors.price?.message}
+                fullWidth
+              />
+
+              {/* Stock */}
+              <TextField
+                type="number"
+                label="Stock"
+                {...register("stock", { required: "Stock is required" })}
+                error={!!errors.stock}
+                helperText={errors.stock?.message}
+                fullWidth
+              />
+
+              {/* On Sale Checkbox */}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    {...register("onSale")}
+                    checked={props.editvaluesprop.onSale}
+                    onChange={(e) =>
+                      setValue("onSale", e.target.checked)
+                    }
+                  />
+                }
+                label="On Sale"
+              />
+            </div>
           </div>
-          <button className="btn btn-success my-3" type="submit">
-            {id ? <>Update Product</> : <>Save Product</>}
-          </button>
-        </form>
+        </div>
       </div>
-      <ProductDetail />
-    </div>
+
+      {/* Submit Button */}
+      <button className="btn btn-success my-3" type="submit">
+        Save Product
+      </button>
+    </form>
   );
 };
 
-export default ManageProduct;

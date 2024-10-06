@@ -20,11 +20,18 @@ function Login() {
   };
 
   //---------------validations---------------\\
+  const defaultValues: LoginModel = {
+    email: "admin@admin.com",  
+    password: "1234",
+  }
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginModel>(); // Explicitly type useForm
+  } = useForm<LoginModel>({
+    defaultValues, 
+  });
   //---------------validations---------------\\
   const Toast = Swal.mixin({
     toast: true,

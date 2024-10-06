@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const baseUrl = "https://my-personal-ecommerece-project.vercel.app/api/";
-// const baseUrl = "http://localhost:7000/api/";
+// const baseUrl = "https://my-personal-ecommerece-project.vercel.app/api/";
+const baseUrl = "http://localhost:7000/api/";
 const ProductService = {
   addProduct: (data: any) => {
     return axios.post(`${baseUrl}product/add-product`, data);

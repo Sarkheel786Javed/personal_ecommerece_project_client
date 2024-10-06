@@ -20,3 +20,10 @@ export interface ProductModel {
   categoryId: [];
   organizationUserId:string;
 }
+
+export interface Category {
+  _id: string;
+  categoryName: string;
+  userId: string;
+  organization: string;
+}
