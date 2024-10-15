@@ -24,6 +24,11 @@ export interface ProductModel {
 export interface Category {
   _id: string;
   categoryName: string;
-  userId: string;
   organization: string;
+}
+export interface CategoryModel {
+  _id: string;
+  categoryName: string;
+  organization: string;
+  totalCategories:number
 }

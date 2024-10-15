@@ -3,9 +3,11 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import "./styles.scss";
 import { Category, ProductModel } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
 import {
-  Checkbox,
-  FormControlLabel,
+  IconButton,
+  Menu,
+  Slider,
   TextField,
+  Typography,
 } from "@mui/material";
 import { Theme, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -19,7 +21,8 @@ import { ProductService } from "../../../Services/ProductServices/ProductService
 import Dropzone, { Accept, FileRejection } from "react-dropzone";
 import Swal from "sweetalert2";
 import { useAuth } from "../../../app/createContextAuth/createContex";
-import CommonModal from "../../CommonModal/CommonModal";
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import CommonModal2 from "../../CommonModal2/CommonModal2";
 
 const Toast = Swal.mixin({
   toast: true,
@@ -58,30 +61,71 @@ const ManageProduct = () => {
   };
 
   const [productsTable, setProductsTable] = useState<ProductModel[]>([]);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  interface filterModel {
+    productName: string,
+    rating: number,
+    onSale: boolean,
+    featured: boolean,
+  }
+  const [filteredProduct, setFilteredProduct] = useState<filterModel>({
+    productName: "",
+    rating: 0,
+    onSale: false,
+    featured: false,
+  })
 
   useEffect(() => {
-    getAllProducts();
-  }, []);
+    debugger
+    if (filteredProduct.productName || filteredProduct.rating || filteredProduct.onSale || filteredProduct.featured) {
+      debugger
+      getProduct()
+    } else {
+      debugger
+      getAllProducts();
+    }
+    console.log("productsTable======", productsTable)
+  }, [filteredProduct]);
 
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+
+
+  const marks = [
+    { value: 0, label: ' 0' },
+    { value: 1, label: ' 1' },
+    { value: 2, label: ' 2' },
+    { value: 3, label: ' 3' },
+    { value: 4, label: ' 4' },
+  ];
+
+  const handleChangeRatingFilter = (value: number) => {
+    setFilteredProduct((preValue) => ({
+      ...preValue,
+      rating: value
+    }))
+  };
   const getAllProducts = async () => {
     try {
       const response = await ProductService.getProduct({
         params: {
-          productName: "",
-          rating: 0,
-          onSale: false,
-          featured: false,
+          productName: filteredProduct.productName,
+          rating: filteredProduct.rating,
+          onSale: filteredProduct.onSale,
+          featured: filteredProduct.featured,
         },
       });
-      if (response.data) {
+      if (response.data.length > 0 && !response.data.response) {
         setProductsTable(response.data);
       }
     } catch (error) {
+      setProductsTable([]);
       console.error("Error fetching products:", error);
     }
   };
-
-  const [modalShow, setModalShow] = useState<boolean>(false);
 
   const handledeleteProduct = async (ProductId: string) => {
     try {
@@ -96,27 +140,40 @@ const ManageProduct = () => {
       }
     } catch (error) {
       console.error("Error deleting product:", error);
-      setProductsTable([]); // Optionally, handle error state differently
+      setProductsTable([]);
     }
   };
+  const [show, setShow] = useState(false);
 
-  const [editValues, setEditValues] = useState<ProductModel>(initialProduct);
-
-  const onEdit = (product: ProductModel) => {
-    setEditValues(product);
-    setModalShow(true);
+  const [editValues, setEditValue] = useState<ProductModel>(initialProduct)
+  const handleClose = () => {
+      setShow(false)
+      setEditValue(initialProduct)
+  };
+  const handleSetValue = (data: ProductModel) => {
+      setEditValue(data)
+      setShow(true)
+  }
+  const handleShow = () => {
+      setShow(true)
   };
 
-  // Define props interface for TableComponent
-  interface TableComponentProps {
-    data: ProductModel[];
-  }
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const TableComponent: React.FC<TableComponentProps> = ({ data }) => {
-    console.log("data============>", data);
+  const getCategories = async () => {
+    try {
+      const response = await ProductService.getCategories("");
+      if (response.data){
+        setCategories(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+  const TableComponent = () => {
     return (
       <div className="w-100">
-        {data && data.length > 0 ? (
+        {productsTable && productsTable.length > 0 ? (
           <table className="table table-hover">
             <thead>
               <tr>
@@ -130,7 +187,7 @@ const ManageProduct = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((row: ProductModel) => (
+              {productsTable.map((row: ProductModel) => (
                 <tr key={row._id}>
                   <th scope="row">{row.productName}</th>
                   <td>{row.price}</td>
@@ -139,7 +196,7 @@ const ManageProduct = () => {
                   <td>
                     <button
                       className="btn btn-primary"
-                      onClick={() => onEdit(row)}
+                      onClick={() => handleSetValue(row)}
                     >
                       Edit
                     </button>
@@ -162,48 +219,152 @@ const ManageProduct = () => {
       </div>
     );
   };
+  const getProduct = async () => {
+    try {
+      if (filteredProduct.productName !== "") {
+        debugger
+        const response = await ProductService.getProduct({
+          params: {
+            productName: filteredProduct.productName,
+            rating: filteredProduct.rating,
+            onSale: filteredProduct.onSale,
+            featured: filteredProduct.featured,
+          },
+        });
+        if (response.data.length > 0 && !response.data.response) {
+          debugger
+          setProductsTable(response.data);
+        }
+      }
+      else {
+        debugger
+        const response = await ProductService.getProduct({
+          params: {
+            productName: filteredProduct.productName,
+            rating: filteredProduct.rating,
+            onSale: filteredProduct.onSale,
+            featured: filteredProduct.featured,
+          },
+        });
+        debugger
+        if (response.data.length > 0 && !response.data.response) {
+          debugger
+          setProductsTable(response.data);
+        }
+      }
+    } catch (err) {
+      setProductsTable([]);
+      console.error(err)
+    }
+  }
 
   return (
     <div className="container-fluid">
-      <div className="d-flex justify-content-end align-items-center py-5">
+      <div className="d-flex flex-wrap  justify-content-end align-items-center py-5 gap-3">
         <input
           type="text"
           className="input_table"
-        // Add value and onChange handlers as needed
+          onChange={(e) => setFilteredProduct(
+            (preValue) =>
+            ({
+              ...preValue,
+              productName: e.target.value
+            }))}
         />
+        <IconButton
+          size="large"
+          aria-label="account of current user"
+          aria-controls="menu-appbar"
+          aria-haspopup="true"
+          onClick={handleMenu}
+          color="inherit"
+        >
+          <FilterAltIcon />
+        </IconButton>
         <button
           type="button"
-          className="ms-2 btn btn-warning"
-          onClick={() => setModalShow(true)}
+          className="btn btn-warning"
+          onClick={handleShow}
         >
           Add New Product
         </button>
       </div>
+      <Menu
+        id="menu-appbar"
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        keepMounted
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        <MenuItem sx={{ display: "block" }} onClick={handleClose}>
+          <Typography sx={{ fontSize: "20px" }}>By Rating</Typography>
+          <Box sx={{ width: 300 }}>
+
+            <Slider
+              aria-label="Steps"
+              defaultValue={0}
+              valueLabelDisplay="auto"
+              step={1}
+              marks={marks}
+              min={0}
+              max={4}
+              onChange={(e, value) => {
+                console.log(e);
+                handleChangeRatingFilter(value as number)}}
+            />
+          </Box>
+        </MenuItem>
+        <MenuItem onClick={handleClose}
+          sx={{ display: "flex", justifyContent: "start", alignItems: "center", gap: "20px", }}
+        >
+          <input
+            type="checkbox"
+            checked={filteredProduct.onSale}
+            onChange={(e) => setFilteredProduct((preValue) => ({ ...preValue, onSale: e.target.checked }))}
+          />
+          <Typography sx={{ fontSize: "20px" }}>OnSale</Typography>
+        </MenuItem>
+        <MenuItem onClick={handleClose}
+          sx={{ display: "flex", justifyContent: "start", alignItems: "center", gap: "20px", }}
+        >
+          <input
+            type="checkbox"
+            checked={filteredProduct.featured}
+            onChange={(e) => setFilteredProduct((preValue) => ({ ...preValue, featured: e.target.checked }))}
+          />
+          <Typography sx={{ fontSize: "20px" }}>Featured</Typography>
+        </MenuItem>
+      </Menu>
       <div className="">
-        <TableComponent data={productsTable} />
+        <TableComponent />
       </div>
-      {modalShow && (
-        <CommonModal
-          show={modalShow}
+      {show && (
+        <CommonModal2
+        show={show}
           getAllProductsProp={getAllProducts}
-          editvaluesprop={editValues}
-          modalnameprop="DepartmentProduct"
-          onHide={() => setModalShow(false)}
-        />
+          editValues={editValues}
+          modalNameProp="DepartmentProduct"
+          handleClose={handleClose}
+          handleShow={handleShow}
+          />
       )}
+
     </div>
   );
 };
 
 export default ManageProduct;
 
-interface AddDepartmentProductProps {
-  editvaluesprop: ProductModel;
-  getAllProductsProp: () => void;
-  onHide: () => void;
-}
 
-export const AddDepartmentProduct: React.FC<AddDepartmentProductProps> = (props) => {
+export const AddDepartmentProduct = (props:any) => {
   const [existingImageUrls, setExistingImageUrls] = useState<any[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [deletedImageUrls, setDeletedImageUrls] = useState<string[]>([]);
@@ -244,42 +405,44 @@ export const AddDepartmentProduct: React.FC<AddDepartmentProductProps> = (props)
   });
 
   const theme = useTheme();
+
+
+
   useEffect(() => {
     getCategories();
-    if (props.editvaluesprop._id && props.editvaluesprop._id !== "0") {
-      setValue("_id", props.editvaluesprop._id);
-      setValue("productName", props.editvaluesprop.productName);
-      setValue("description", props.editvaluesprop.description);
-      setValue("size", props.editvaluesprop.size);
-      setValue("gender", props.editvaluesprop.gender);
-      setValue("price", props.editvaluesprop.price);
-      setValue("stock", props.editvaluesprop.stock);
-      setValue("discount", props.editvaluesprop.discount);
-      setValue("discountType", props.editvaluesprop.discountType);
-      setValue("hover", props.editvaluesprop.hover);
-      setValue("rating", props.editvaluesprop.rating);
-      setValue("onSale", props.editvaluesprop.onSale);
-      setValue("featured", props.editvaluesprop.featured);
-      setValue("organizationName", props.editvaluesprop.organizationName);
-      setValue("organizationUserId", props.editvaluesprop.organizationUserId);
-      setValue("categoryId", props.editvaluesprop.categoryId);
-      setExistingImageUrls(props.editvaluesprop?.images || []);
-      setSelectedCategories(props.editvaluesprop.categoryId.map(id => String(id)));
+    if (props.editValues._id && props.editValues._id !== "0") {
+      setValue("_id", props.editValues._id);
+      setValue("productName", props.editValues.productName);
+      setValue("description", props.editValues.description);
+      setValue("size", props.editValues.size);
+      setValue("gender", props.editValues.gender);
+      setValue("price", props.editValues.price);
+      setValue("stock", props.editValues.stock);
+      setValue("discount", props.editValues.discount);
+      setValue("discountType", props.editValues.discountType);
+      setValue("hover", props.editValues.hover);
+      setValue("rating", props.editValues.rating);
+      setOnSaleChecked(props.editValues.onSale);
+      setValue("featured", props.editValues.featured);
+      setValue("organizationName", props.editValues.organizationName);
+      setValue("organizationUserId", props.editValues.organizationUserId);
+      setValue("categoryId", props.editValues.categoryId);
+      setExistingImageUrls(props.editValues?.images || []);
+      setSelectedCategories(props.editValues.categoryId.map((id:any) => String(id)));
     }
-  }, [props.editvaluesprop]);
+  }, [props.editValues]);
 
   const getCategories = async () => {
     try {
       const response = await ProductService.getCategories("");
       if (response.data) {
-        setCategories(response.data.categories);
+        setCategories(response.data);
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
   };
 
-  // Dropzone accept configurations
   const accept: Accept = {
     "image/jpeg": [".jpeg", ".jpg"],
     "image/png": [".png"],
@@ -288,7 +451,6 @@ export const AddDepartmentProduct: React.FC<AddDepartmentProductProps> = (props)
 
   const maxTotalFiles = 6;
 
-  // Handle file drops
   const onDrop = (acceptedFiles: File[], fileRejections: FileRejection[]) => {
     const remainingSlots = maxTotalFiles - images.length;
 
@@ -344,7 +506,8 @@ export const AddDepartmentProduct: React.FC<AddDepartmentProductProps> = (props)
     };
   }
 
-  // Form submission handler
+  const [onSaleChecked, setOnSaleChecked] = useState<any>()
+
   const [auth] = useAuth()
   const onSubmit: SubmitHandler<ProductModel> = async (data) => {
     try {
@@ -364,6 +527,7 @@ export const AddDepartmentProduct: React.FC<AddDepartmentProductProps> = (props)
       formData.append("hover", (data.hover ?? 0).toString());
       formData.append("rating", (data.rating ?? 0).toString());
       formData.append("onSale", (data.onSale ?? false).toString());
+
       formData.append("featured", (data.featured ?? false).toString());
       formData.append("organizationName", (auth.Organization ?? "").toString());
       formData.append("organizationUserId", (auth._id ?? "").toString());
@@ -392,7 +556,7 @@ export const AddDepartmentProduct: React.FC<AddDepartmentProductProps> = (props)
           title: res.data.message,
         });
         reset()
-        props.onHide();
+        props.handleClose();
         props.getAllProductsProp();
       });
     } catch (error) {
@@ -541,7 +705,7 @@ export const AddDepartmentProduct: React.FC<AddDepartmentProductProps> = (props)
                   renderValue={(selected) => (
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                       {selected.map((id) => {
-                        const category = categories.find((cat) => cat._id === id);
+                        const category = categories?.find(cat => cat._id === id);
                         return category ? <Chip key={id} label={category.categoryName} /> : null;
                       })}
                     </Box>
@@ -555,7 +719,7 @@ export const AddDepartmentProduct: React.FC<AddDepartmentProductProps> = (props)
                     },
                   }}
                 >
-                  {categories.map((category) => (
+                  {categories?.map((category) => (
                     <MenuItem
                       key={category._id}
                       value={category._id}
@@ -622,20 +786,15 @@ export const AddDepartmentProduct: React.FC<AddDepartmentProductProps> = (props)
                 helperText={errors.stock?.message}
                 fullWidth
               />
-
-              {/* On Sale Checkbox */}
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    {...register("onSale")}
-                    checked={props.editvaluesprop.onSale}
-                    onChange={(e) =>
-                      setValue("onSale", e.target.checked)
-                    }
-                  />
-                }
-                label="On Sale"
-              />
+              <div className="d-flex justify-content-start align-items-center gap-3">
+                <label className="">OnSale</label>
+                <input
+                  type="checkbox"
+                  {...register("onSale")}
+                  checked={onSaleChecked}
+                  onChange={(e) => setOnSaleChecked(e.target.checked)}
+                />
+              </div>
             </div>
           </div>
         </div>

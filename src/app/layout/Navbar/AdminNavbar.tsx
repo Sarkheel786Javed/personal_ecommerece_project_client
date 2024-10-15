@@ -17,7 +17,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { sidebarAuth } from "../../createContextAuth/CreateSidebarContext";
 import { ToggleButton } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -84,7 +84,11 @@ export default function PrimarySearchAppBar() {
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
-
+const navigate = useNavigate()
+  const HandleLogout = ()=>{
+    localStorage.removeItem("token")
+    navigate('/auth')
+  }
   const menuId = "primary-search-account-menu";
   const renderMenu = (
     <Menu
@@ -156,6 +160,18 @@ export default function PrimarySearchAppBar() {
         </IconButton>
         <p>Profile</p>
       </MenuItem>
+      <MenuItem onClick={HandleLogout}>
+        <IconButton
+          size="large"
+          aria-label="account of current user"
+          aria-controls="primary-search-account-menu"
+          aria-haspopup="true"
+          color="inherit"
+        >
+          <AccountCircle />
+        </IconButton>
+        <p>Logout</p>
+      </MenuItem>
     </Menu>
   );
   const handleSidebar = () => {
@@ -167,7 +183,7 @@ export default function PrimarySearchAppBar() {
   };
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" color="warning" enableColorOnDark>
+      <AppBar position="static" color="primary" enableColorOnDark>
         <Toolbar>
           <IconButton
             size="large"

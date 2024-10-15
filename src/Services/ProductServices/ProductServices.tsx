@@ -6,18 +6,21 @@ const ProductService = {
   addProduct: (data: any) => {
     return axios.post(`${baseUrl}product/add-product`, data);
   },
-  getProduct: (data:any) => {
-    return axios.get(`${baseUrl}product/get-products` ,data);
+  getProduct: (data: any) => {
+    return axios.get(`${baseUrl}product/get-products`, data);
   },
-  deleteProduct: (productId:string) => {
+  deleteProduct: (productId: string) => {
     return axios.delete(`${baseUrl}product/delete-product/${productId}`);
   },
   //  categoryName, userId
-  createCategories: (data:any) => {
+  createCategories: (data: any) => {
     return axios.post(`${baseUrl}product/category/add-category`, data);
   },
-  getCategories: (userId:string) => {
-    return axios.get(`${baseUrl}product/category/get-category/?userId=${userId}`);
+  getCategories: (data: any) => {
+    return axios.get(`${baseUrl}product/category/get-category`, data);
+  },
+ DeleteCategories: (CategoryId: any) => {
+    return axios.delete(`${baseUrl}product/category/delete-category/${CategoryId}`);
   },
 };
 

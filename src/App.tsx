@@ -9,6 +9,7 @@ import Authorization from "./app/Auth/Auth.js";
 import PrivateRoutes from "./app/PrivateRoutes/DashboardWrapper.js";
 import Dashboard from "./Components/Dashboard/Dashboard.js";
 import ManageProduct from './Components/departmentManagement/ManageProduct/ManageProduct.js'
+import ManageProductCategory from "./Components/departmentManagement/ManageProductCategory/ManageProductCategory.js";
 function App() {
   return (
     <BrowserRouter>
@@ -48,6 +49,7 @@ function App() {
         <Route path="/auth" element={ <Authorization><PrivateRoutes /></Authorization>}>
           <Route path="dashboard" element={<Dashboard />}/>
           <Route path="manage-product" element={<ManageProduct />}/>
+          <Route path="manage-product-category" element={<ManageProductCategory />}/>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -74,25 +74,26 @@ function TopprodectsbyFilter() {
   };
   return (
     <motion.div className="w-100 mt-5"
-    initial={{opacity: 0 , scale: 0}}
-    whileInView={{opacity: 1 , scale: 1}}
-    transition={{duration: 0.6}}
+    // initial={{opacity: 0 , scale: 0}}
+    // whileInView={{opacity: 1 , scale: 1}}
+    // transition={{duration: 2}}
+    
     // viewport={{once:true}}
     >
       <div className="container-fluid">
         <div className="row">
           <motion.div className="col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-4 border border-warning card_cover p-3"
-          // initial={{
-          //   opacity: 0,
-          //   y: -100,
-          // }}
-          // whileInView={{
-          //   opacity: 1,
-          //   y: 0, // Slide in to its original position
-          //   transition: {
-          //     duration: 2, // Animation duration
-          //   },
-          // }}
+          initial={{
+            opacity: 0,
+            x: -300,
+          }}
+          whileInView={{
+            opacity: 1,
+            x: 0, // Slide in to its original position
+            transition: {
+              duration: 2, // Animation duration
+            },
+          }}
           // viewport={{ once: true }}
           >
             <div className=" card_header">
@@ -149,17 +150,17 @@ function TopprodectsbyFilter() {
           </motion.div>
           <div className="col-xs-12 col-sm-12 col-md-6 col-lg-8 col-xl-8 col-xxl-8 pt-3">
             <motion.div
-              // initial={{
-              //   opacity: 0,
-              //   y: 100,
-              // }}
-              // whileInView={{
-              //   opacity: 1,
-              //   y: 0, // Slide in to its original position
-              //   transition: {
-              //     duration: 2, // Animation duration
-              //   },
-              // }}
+              initial={{
+                opacity: 0,
+                x: 300,
+              }}
+              whileInView={{
+                opacity: 1,
+                x: 0, // Slide in to its original position
+                transition: {
+                  duration: 2, // Animation duration
+                },
+              }}
               // viewport={{ once: true }}
             >
                <ProductComponent />
