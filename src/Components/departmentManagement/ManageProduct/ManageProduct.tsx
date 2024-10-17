@@ -62,14 +62,17 @@ const ManageProduct = () => {
 
   const [productsTable, setProductsTable] = useState<ProductModel[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [auth] = useAuth()
 
   interface filterModel {
+    userId:string,
     productName: string,
     rating: number,
     onSale: boolean,
     featured: boolean,
   }
   const [filteredProduct, setFilteredProduct] = useState<filterModel>({
+    userId: "0",
     productName: "",
     rating: 0,
     onSale: false,
@@ -77,16 +80,28 @@ const ManageProduct = () => {
   })
 
   useEffect(() => {
-    debugger
-    if (filteredProduct.productName || filteredProduct.rating || filteredProduct.onSale || filteredProduct.featured) {
-      debugger
-      getProduct()
-    } else {
-      debugger
-      getAllProducts();
+    if (auth._id) {
+      setFilteredProduct((preValue) => ({
+        ...preValue,
+        userId: String(auth._id)
+      }));
     }
-    console.log("productsTable======", productsTable)
+  }, [auth._id]);
+
+  
+  useEffect(() => {
+    const { userId, productName, rating, onSale, featured } = filteredProduct;
+  
+    if (userId && userId !== "0") {
+      // Decide whether to fetch all products or filtered products
+      if (productName || rating || onSale || featured) {
+        getProduct();
+      } else {
+        getAllProducts();
+      }
+    }
   }, [filteredProduct]);
+  
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -112,6 +127,7 @@ const ManageProduct = () => {
     try {
       const response = await ProductService.getProduct({
         params: {
+          organizationUserId: filteredProduct.userId,
           productName: filteredProduct.productName,
           rating: filteredProduct.rating,
           onSale: filteredProduct.onSale,
@@ -158,18 +174,18 @@ const ManageProduct = () => {
       setShow(true)
   };
 
-  const [categories, setCategories] = useState<Category[]>([]);
+  // const [categories, setCategories] = useState<Category[]>([]);
 
-  const getCategories = async () => {
-    try {
-      const response = await ProductService.getCategories("");
-      if (response.data){
-        setCategories(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
+  // const getCategories = async () => {
+  //   try {
+  //     const response = await ProductService.getCategories("");
+  //     if (response.data){
+  //       setCategories(response.data);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching categories:", error);
+  //   }
+  // };
   const TableComponent = () => {
     return (
       <div className="w-100">
@@ -225,6 +241,7 @@ const ManageProduct = () => {
         debugger
         const response = await ProductService.getProduct({
           params: {
+            organizationUserId: filteredProduct.userId,
             productName: filteredProduct.productName,
             rating: filteredProduct.rating,
             onSale: filteredProduct.onSale,

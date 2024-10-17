@@ -1,8 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./styles.scss";
 import { Link } from "react-router-dom";
 import Products from "../Products/Products";
 import TopprodectsbyFilter from "../TopProdectsbyFilter/TopprodectsbyFilter";
+import { AuthService } from "../../Services/AuthServices/AuthServices";
+import {
+  Backdrop,
+  Box,
+  SpeedDial,
+  SpeedDialAction,
+  SpeedDialIcon,
+} from "@mui/material";
 function HomePage() {
   const [isDropdownOpen, setDropdownOpen] = useState(true);
 
@@ -47,6 +55,23 @@ function HomePage() {
   //     </div>
   //   );
   // };
+  useEffect(() => {
+    getDepartment();
+  }, []);
+  const [department, setDepartment] = useState<any[]>([]);
+  const getDepartment = async () => {
+    try {
+      const response = await AuthService.getDepartment("Department");
+      if (response.data) {
+        setDepartment(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
   return (
     <div className="container-fluid">
       <div className="row">
@@ -71,66 +96,18 @@ function HomePage() {
                       isDropdownOpen === true ? "d-block" : " d-none"
                     }`}
                   >
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 1
-                      </Link>
-                    </li>
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 2
-                      </Link>
-                    </li>
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 3
-                      </Link>
-                    </li>
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 4
-                      </Link>
-                    </li>
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 5
-                      </Link>
-                    </li>
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 6
-                      </Link>
-                    </li>
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 7
-                      </Link>
-                    </li>
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 8
-                      </Link>
-                    </li>
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 9
-                      </Link>
-                    </li>
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 10
-                      </Link>
-                    </li>
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 10
-                      </Link>
-                    </li>
-                    <li className="list_department_li">
-                      <Link to="/" className="text-decoration-none">
-                        Department of 10
-                      </Link>
-                    </li>
+                    {department.map((data) => (
+                      <li className="list_department_li">
+                        <Box sx={{ transform: "translateZ(0px)", flexGrow: 1 }}>
+                          {/* {actions.map((action) => ( */}
+                          <Link to="/" className="text-decoration-none">
+                            <Backdrop open={open} />
+                            {data.userName}
+                          </Link>
+                          {/* ))} */}
+                        </Box>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -162,7 +139,7 @@ function HomePage() {
           </div>
 
           {/* //////////////////////////header end//////////////////////////////// */}
-          
+
           <div
             id="carouselExampleCaptions"
             className="carousel slide"

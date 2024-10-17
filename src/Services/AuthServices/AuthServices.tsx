@@ -1,10 +1,11 @@
 import axios from "axios";
 import { ForgetModel, LoginModel, SignupModel } from "../../Model/AuthModel/AuthModel";
 
-const baseUrl = "https://my-personal-ecommerece-project.vercel.app/api";
+// const baseUrl = "https://my-personal-ecommerece-project.vercel.app/api/";
+const baseUrl = "http://localhost:7000/api";
 const AuthService = {
   SignupAuth: (data: SignupModel) => {
-    return axios.post(`${baseUrl}/user/signup`, data);
+    return axios.post(`${baseUrl}/user/register`, data);
   },
   Login:  (data: LoginModel) => {
     return  axios.post(`${baseUrl}/user/login`, data);
@@ -19,6 +20,9 @@ const AuthService = {
       },
     });
   },
+  getDepartment: (organization:String) => {
+    return axios.get(`${baseUrl}/user/getalldepartment/${organization}`)
+    },
   getToken: (): string | null => {
     return localStorage.getItem("token");
   },

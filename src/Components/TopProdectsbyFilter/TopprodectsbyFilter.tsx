@@ -74,9 +74,9 @@ function TopprodectsbyFilter() {
   };
   return (
     <motion.div className="w-100 mt-5"
-    // initial={{opacity: 0 , scale: 0}}
-    // whileInView={{opacity: 1 , scale: 1}}
-    // transition={{duration: 2}}
+    initial={{opacity: 0 , scale: 0}}
+    whileInView={{opacity: 1 , scale: 1}}
+    transition={{duration: 2}}
     
     // viewport={{once:true}}
     >
