@@ -1,27 +1,24 @@
 import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import "./styles.scss";
-import { Category, ProductModel } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
 import {
-  IconButton,
-  Menu,
-  Slider,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { Theme, useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import Chip from '@mui/material/Chip';
+  Category,
+  ProductModel,
+} from "../../../Model/DepartmentProductModel/DepartmentProductModel";
+import { IconButton, Menu, Slider, TextField, Typography } from "@mui/material";
+import { Theme, useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Chip from "@mui/material/Chip";
 import { ProductService } from "../../../Services/ProductServices/ProductServices";
 import Dropzone, { Accept, FileRejection } from "react-dropzone";
 import Swal from "sweetalert2";
 import { useAuth } from "../../../app/createContextAuth/createContex";
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import CommonModal2 from "../../CommonModal2/CommonModal2";
 
 const Toast = Swal.mixin({
@@ -62,14 +59,14 @@ const ManageProduct = () => {
 
   const [productsTable, setProductsTable] = useState<ProductModel[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [auth] = useAuth()
+  const [auth] = useAuth();
 
   interface filterModel {
-    userId:string,
-    productName: string,
-    rating: number,
-    onSale: boolean,
-    featured: boolean,
+    userId: string;
+    productName: string;
+    rating: number;
+    onSale: boolean;
+    featured: boolean;
   }
   const [filteredProduct, setFilteredProduct] = useState<filterModel>({
     userId: "0",
@@ -77,21 +74,20 @@ const ManageProduct = () => {
     rating: 0,
     onSale: false,
     featured: false,
-  })
+  });
 
   useEffect(() => {
     if (auth._id) {
       setFilteredProduct((preValue) => ({
         ...preValue,
-        userId: String(auth._id)
+        userId: String(auth._id),
       }));
     }
   }, [auth._id]);
 
-  
   useEffect(() => {
     const { userId, productName, rating, onSale, featured } = filteredProduct;
-  
+
     if (userId && userId !== "0") {
       // Decide whether to fetch all products or filtered products
       if (productName || rating || onSale || featured) {
@@ -101,27 +97,24 @@ const ManageProduct = () => {
       }
     }
   }, [filteredProduct]);
-  
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-
-
   const marks = [
-    { value: 0, label: ' 0' },
-    { value: 1, label: ' 1' },
-    { value: 2, label: ' 2' },
-    { value: 3, label: ' 3' },
-    { value: 4, label: ' 4' },
+    { value: 0, label: " 0" },
+    { value: 1, label: " 1" },
+    { value: 2, label: " 2" },
+    { value: 3, label: " 3" },
+    { value: 4, label: " 4" },
   ];
 
   const handleChangeRatingFilter = (value: number) => {
     setFilteredProduct((preValue) => ({
       ...preValue,
-      rating: value
-    }))
+      rating: value,
+    }));
   };
   const getAllProducts = async () => {
     try {
@@ -161,17 +154,17 @@ const ManageProduct = () => {
   };
   const [show, setShow] = useState(false);
 
-  const [editValues, setEditValue] = useState<ProductModel>(initialProduct)
+  const [editValues, setEditValue] = useState<ProductModel>(initialProduct);
   const handleClose = () => {
-      setShow(false)
-      setEditValue(initialProduct)
+    setShow(false);
+    setEditValue(initialProduct);
   };
   const handleSetValue = (data: ProductModel) => {
-      setEditValue(data)
-      setShow(true)
-  }
+    setEditValue(data);
+    setShow(true);
+  };
   const handleShow = () => {
-      setShow(true)
+    setShow(true);
   };
 
   // const [categories, setCategories] = useState<Category[]>([]);
@@ -238,7 +231,7 @@ const ManageProduct = () => {
   const getProduct = async () => {
     try {
       if (filteredProduct.productName !== "") {
-        debugger
+        debugger;
         const response = await ProductService.getProduct({
           params: {
             organizationUserId: filteredProduct.userId,
@@ -249,31 +242,31 @@ const ManageProduct = () => {
           },
         });
         if (response.data.length > 0 && !response.data.response) {
-          debugger
+          debugger;
           setProductsTable(response.data);
         }
-      }
-      else {
-        debugger
+      } else {
+        debugger;
         const response = await ProductService.getProduct({
           params: {
+            organizationUserId: filteredProduct.userId,
             productName: filteredProduct.productName,
             rating: filteredProduct.rating,
             onSale: filteredProduct.onSale,
             featured: filteredProduct.featured,
           },
         });
-        debugger
+        debugger;
         if (response.data.length > 0 && !response.data.response) {
-          debugger
+          debugger;
           setProductsTable(response.data);
         }
       }
     } catch (err) {
       setProductsTable([]);
-      console.error(err)
+      console.error(err);
     }
-  }
+  };
 
   return (
     <div className="container-fluid">
@@ -281,12 +274,12 @@ const ManageProduct = () => {
         <input
           type="text"
           className="input_table"
-          onChange={(e) => setFilteredProduct(
-            (preValue) =>
-            ({
+          onChange={(e) =>
+            setFilteredProduct((preValue) => ({
               ...preValue,
-              productName: e.target.value
-            }))}
+              productName: e.target.value,
+            }))
+          }
         />
         <IconButton
           size="large"
@@ -298,11 +291,7 @@ const ManageProduct = () => {
         >
           <FilterAltIcon />
         </IconButton>
-        <button
-          type="button"
-          className="btn btn-warning"
-          onClick={handleShow}
-        >
+        <button type="button" className="btn btn-warning" onClick={handleShow}>
           Add New Product
         </button>
       </div>
@@ -310,21 +299,22 @@ const ManageProduct = () => {
         id="menu-appbar"
         anchorEl={anchorEl}
         anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: "top",
+          horizontal: "right",
         }}
         keepMounted
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: "top",
+          horizontal: "right",
         }}
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
         <MenuItem sx={{ display: "block" }} onClick={handleClose}>
-          <Typography sx={{ fontSize: "20px" }}>By Rating</Typography>
+          <Typography sx={{ fontSize: "20px" }} onClick={handleClose}>
+            By Rating
+          </Typography>
           <Box sx={{ width: 300 }}>
-
             <Slider
               aria-label="Steps"
               defaultValue={0}
@@ -335,29 +325,59 @@ const ManageProduct = () => {
               max={4}
               onChange={(e, value) => {
                 console.log(e);
-                handleChangeRatingFilter(value as number)}}
+                handleChangeRatingFilter(value as number);
+                handleClose();
+              }}
             />
           </Box>
         </MenuItem>
-        <MenuItem onClick={handleClose}
-          sx={{ display: "flex", justifyContent: "start", alignItems: "center", gap: "20px", }}
+        <MenuItem
+          onClick={handleClose}
+          sx={{
+            display: "flex",
+            justifyContent: "start",
+            alignItems: "center",
+            gap: "20px",
+          }}
         >
           <input
             type="checkbox"
             checked={filteredProduct.onSale}
-            onChange={(e) => setFilteredProduct((preValue) => ({ ...preValue, onSale: e.target.checked }))}
+            onChange={(e) => {
+              setFilteredProduct((preValue) => ({
+                ...preValue,
+                onSale: e.target.checked,
+              }));
+              handleClose();
+            }}
           />
-          <Typography sx={{ fontSize: "20px" }}>OnSale</Typography>
+          <Typography sx={{ fontSize: "20px" }} onClick={handleClose}>
+            OnSale
+          </Typography>
         </MenuItem>
-        <MenuItem onClick={handleClose}
-          sx={{ display: "flex", justifyContent: "start", alignItems: "center", gap: "20px", }}
+        <MenuItem
+          onClick={handleClose}
+          sx={{
+            display: "flex",
+            justifyContent: "start",
+            alignItems: "center",
+            gap: "20px",
+          }}
         >
           <input
             type="checkbox"
             checked={filteredProduct.featured}
-            onChange={(e) => setFilteredProduct((preValue) => ({ ...preValue, featured: e.target.checked }))}
+            onChange={(e) => {
+              setFilteredProduct((preValue) => ({
+                ...preValue,
+                featured: e.target.checked,
+              }));
+              handleClose();
+            }}
           />
-          <Typography sx={{ fontSize: "20px" }}>Featured</Typography>
+          <Typography sx={{ fontSize: "20px" }} onClick={handleClose}>
+            Featured
+          </Typography>
         </MenuItem>
       </Menu>
       <div className="">
@@ -365,23 +385,21 @@ const ManageProduct = () => {
       </div>
       {show && (
         <CommonModal2
-        show={show}
+          show={show}
           getAllProductsProp={getAllProducts}
           editValues={editValues}
           modalNameProp="DepartmentProduct"
           handleClose={handleClose}
           handleShow={handleShow}
-          />
+        />
       )}
-
     </div>
   );
 };
 
 export default ManageProduct;
 
-
-export const AddDepartmentProduct = (props:any) => {
+export const AddDepartmentProduct = (props: any) => {
   const [existingImageUrls, setExistingImageUrls] = useState<any[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [deletedImageUrls, setDeletedImageUrls] = useState<string[]>([]);
@@ -423,8 +441,6 @@ export const AddDepartmentProduct = (props:any) => {
 
   const theme = useTheme();
 
-
-
   useEffect(() => {
     getCategories();
     if (props.editValues._id && props.editValues._id !== "0") {
@@ -438,14 +454,18 @@ export const AddDepartmentProduct = (props:any) => {
       setValue("discount", props.editValues.discount);
       setValue("discountType", props.editValues.discountType);
       setValue("hover", props.editValues.hover);
-      setValue("rating", props.editValues.rating);
+      // setValue("rating", props.editValues.rating);
+      setFeaturedChecked(props.editValues.featured);
       setOnSaleChecked(props.editValues.onSale);
-      setValue("featured", props.editValues.featured);
+      setRatingChecked(props.editValues.rating);
+      // setValue("featured", props.editValues.featured);
       setValue("organizationName", props.editValues.organizationName);
       setValue("organizationUserId", props.editValues.organizationUserId);
       setValue("categoryId", props.editValues.categoryId);
       setExistingImageUrls(props.editValues?.images || []);
-      setSelectedCategories(props.editValues.categoryId.map((id:any) => String(id)));
+      setSelectedCategories(
+        props.editValues.categoryId.map((id: any) => String(id))
+      );
     }
   }, [props.editValues]);
 
@@ -503,18 +523,21 @@ export const AddDepartmentProduct = (props:any) => {
     setExistingImageUrls((prevUrls) => prevUrls.filter((_, i) => i !== index));
   };
 
-  const handleChange = (event: SelectChangeEvent<typeof selectedCategories>) => {
+  const handleChange = (
+    event: SelectChangeEvent<typeof selectedCategories>
+  ) => {
     const {
       target: { value },
     } = event;
-    setSelectedCategories(
-      typeof value === "string" ? value.split(",") : value,
-    );
+    setSelectedCategories(typeof value === "string" ? value.split(",") : value);
   };
 
-
   // Helper function for styling categories
-  function getStyles(categoryName: string, selectedCategories: readonly string[], theme: Theme) {
+  function getStyles(
+    categoryName: string,
+    selectedCategories: readonly string[],
+    theme: Theme
+  ) {
     return {
       fontWeight:
         selectedCategories.indexOf(categoryName) === -1
@@ -523,9 +546,11 @@ export const AddDepartmentProduct = (props:any) => {
     };
   }
 
-  const [onSaleChecked, setOnSaleChecked] = useState<any>()
+  const [onSaleChecked, setOnSaleChecked] = useState<any>();
+  const [ratingChecked, setRatingChecked] = useState<any>();
+  const [featuredChecked, setFeaturedChecked] = useState<any>();
 
-  const [auth] = useAuth()
+  const [auth] = useAuth();
   const onSubmit: SubmitHandler<ProductModel> = async (data) => {
     try {
       const formData = new FormData();
@@ -550,13 +575,17 @@ export const AddDepartmentProduct = (props:any) => {
       formData.append("organizationUserId", (auth._id ?? "").toString());
 
       // Append existing image URLs to retain
-      existingImageUrls.forEach((url) => formData.append("existingImageUrls", url));
+      existingImageUrls.forEach((url) =>
+        formData.append("existingImageUrls", url)
+      );
 
       // Append image URLs marked for deletion
-      deletedImageUrls.forEach((url) => formData.append("deletedImageUrls", url));
+      deletedImageUrls.forEach((url) =>
+        formData.append("deletedImageUrls", url)
+      );
 
       images.forEach((image) => {
-        formData.append('images', image); // Assuming images is an array of File objects
+        formData.append("images", image); // Assuming images is an array of File objects
       });
 
       // Append selected category IDs
@@ -572,7 +601,7 @@ export const AddDepartmentProduct = (props:any) => {
           icon: "success",
           title: res.data.message,
         });
-        reset()
+        reset();
         props.handleClose();
         props.getAllProductsProp();
       });
@@ -642,7 +671,10 @@ export const AddDepartmentProduct = (props:any) => {
                     ) : (
                       <p>
                         Drag 'n' drop some files here, or{" "}
-                        <button type="button" className="btn btn-outline-primary mt-3">
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary mt-3"
+                        >
                           Upload Images
                         </button>
                       </p>
@@ -651,7 +683,9 @@ export const AddDepartmentProduct = (props:any) => {
                 )}
               </Dropzone>
 
-              {errorMessage && <div className="text-danger mt-2">{errorMessage}</div>}
+              {errorMessage && (
+                <div className="text-danger mt-2">{errorMessage}</div>
+              )}
 
               {/* Display Existing and New Images */}
               <div className="row my-3">
@@ -711,19 +745,30 @@ export const AddDepartmentProduct = (props:any) => {
             <div className="w-100 d-flex flex-wrap justify-content-start align-items-start gap-3 my-3">
               {/* Discount Type */}
               <FormControl sx={{ m: 1, width: 300 }}>
-                <InputLabel id="category-multiple-chip-label">Categories</InputLabel>
+                <InputLabel id="category-multiple-chip-label">
+                  Categories
+                </InputLabel>
                 <Select
                   labelId="category-multiple-chip-label"
                   id="category-multiple-chip"
                   multiple
                   value={selectedCategories}
                   onChange={handleChange}
-                  input={<OutlinedInput id="select-multiple-chip" label="Categories" />}
+                  input={
+                    <OutlinedInput
+                      id="select-multiple-chip"
+                      label="Categories"
+                    />
+                  }
                   renderValue={(selected) => (
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                       {selected.map((id) => {
-                        const category = categories?.find(cat => cat._id === id);
-                        return category ? <Chip key={id} label={category.categoryName} /> : null;
+                        const category = categories?.find(
+                          (cat) => cat._id === id
+                        );
+                        return category ? (
+                          <Chip key={id} label={category.categoryName} />
+                        ) : null;
                       })}
                     </Box>
                   )}
@@ -740,14 +785,17 @@ export const AddDepartmentProduct = (props:any) => {
                     <MenuItem
                       key={category._id}
                       value={category._id}
-                      style={getStyles(category.categoryName, selectedCategories, theme)}
+                      style={getStyles(
+                        category.categoryName,
+                        selectedCategories,
+                        theme
+                      )}
                     >
                       {category.categoryName}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
-
 
               {/* Discount Type */}
               <TextField
@@ -764,12 +812,16 @@ export const AddDepartmentProduct = (props:any) => {
                 helperText={errors.discountType?.message}
                 fullWidth
               >
-                <option value="Chinese New Year Discount">Chinese New Year Discount</option>
+                <option value="Chinese New Year Discount">
+                  Chinese New Year Discount
+                </option>
                 <option value="Diwali Discount">Diwali Discount</option>
                 <option value="Christmas Discount">Christmas Discount</option>
                 <option value="Summer Discount">Summer Discount</option>
                 <option value="Winter Discount">Winter Discount</option>
-                <option value="Black Friday Discount">Black Friday Discount</option>
+                <option value="Black Friday Discount">
+                  Black Friday Discount
+                </option>
               </TextField>
 
               {/* Discount */}
@@ -803,14 +855,34 @@ export const AddDepartmentProduct = (props:any) => {
                 helperText={errors.stock?.message}
                 fullWidth
               />
-              <div className="d-flex justify-content-start align-items-center gap-3">
-                <label className="">OnSale</label>
-                <input
-                  type="checkbox"
-                  {...register("onSale")}
-                  checked={onSaleChecked}
-                  onChange={(e) => setOnSaleChecked(e.target.checked)}
-                />
+              <div className="d-block">
+                <div className="d-flex justify-content-start align-items-center gap-3 my-3">
+                  <input
+                    type="checkbox"
+                    {...register("onSale")}
+                    checked={onSaleChecked}
+                    onChange={(e) => setOnSaleChecked(e.target.checked)}
+                  />
+                  <label className="">OnSale</label>
+                </div>
+                <div className="d-flex justify-content-start align-items-center gap-3 my-3">
+                  <input
+                    type="checkbox"
+                    {...register("rating")}
+                    checked={ratingChecked}
+                    onChange={(e) => setRatingChecked(e.target.checked)}
+                  />
+                  <label className="">Rating</label>
+                </div>
+                <div className="d-flex justify-content-start align-items-center gap-3 my-3">
+                  <input
+                    type="checkbox"
+                    {...register("featured")}
+                    checked={featuredChecked}
+                    onChange={(e) => setFeaturedChecked(e.target.checked)}
+                  />
+                  <label className="">Featured</label>
+                </div>
               </div>
             </div>
           </div>
@@ -824,4 +896,3 @@ export const AddDepartmentProduct = (props:any) => {
     </form>
   );
 };
-

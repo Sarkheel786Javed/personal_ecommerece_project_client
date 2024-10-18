@@ -2,6 +2,9 @@
 import { useState } from "react";
 import styles from "./navbar.module.css";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../createContextAuth/createContex";
+import { IconButton, Menu, MenuItem } from "@mui/material";
+import { AccountCircle } from "@mui/icons-material";
 // const drawerWidth = 240;
 // const navItems = [
 //   { Title: "Home", Icon: "", Path: "/home" },
@@ -10,6 +13,23 @@ import { Link, useNavigate } from "react-router-dom";
 // ];
 
 function Navbar() {
+  const [auth] = useAuth();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const navigate = useNavigate();
+  const HandleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/auth");
+  };
+
   const TopLinks = [
     {
       items: (
@@ -82,7 +102,6 @@ function Navbar() {
   ];
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>("");
-  const navigate = useNavigate();
 
   const handleSearch = () => {
     if (searchString) {
@@ -236,9 +255,56 @@ function Navbar() {
               data-bs-html="true"
               title="MyAccounts"
             >
-              <Link to="/login" className="cursor-pointer  text-secondary">
-                <i className="fs-3 bi bi-person-fill" />
-              </Link>
+              {auth ? (
+                <div>
+                  <IconButton
+                    size="large"
+                    aria-label="account of current user"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    onClick={handleMenu}
+                    color="inherit"
+                  >
+                    <AccountCircle />
+                  </IconButton>
+                  <Menu
+                    id="menu-appbar"
+                    anchorEl={anchorEl}
+                    anchorOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                  >
+                    <MenuItem onClick={handleClose}>
+                      <Link
+                        to="/auth/dashboard"
+                        className="cursor-pointer text-secondary text-decoration-none text-dark"
+                      >
+                        Dashboard
+                      </Link>
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleClose();
+                        HandleLogout();
+                      }}
+                    >
+                      Logout
+                    </MenuItem>
+                  </Menu>
+                </div>
+              ) : (
+                <Link to="/login" className="cursor-pointer  text-secondary">
+                  <i className="fs-3 bi bi-person-fill" />
+                </Link>
+              )}
             </div>
           </div>
           <div

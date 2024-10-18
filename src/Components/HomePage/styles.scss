@@ -112,6 +112,7 @@
   align-items: center;
   transition:background-color 0.1s ease-in-out;
   padding: 5px 10px;
+  position: relative;
 }
 
 .list_department_li:hover {
@@ -119,6 +120,19 @@
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
 }
+.list_department_li_child_close{
+  display: none;
+}
+
+.list_department_li_child_open {
+  display: block;
+  position: absolute;
+  top: 20px;
+  left: 10px;
+  z-index: 100;
+  background-color: red;
+}
+
 .list_department_li a {
   word-wrap: break-word;
   white-space: pre-wrap;

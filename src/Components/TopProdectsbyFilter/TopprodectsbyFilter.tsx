@@ -5,6 +5,7 @@ import { ProductModel } from "../../Model/DepartmentProductModel/DepartmentProdu
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ProductService } from "../../Services/ProductServices/ProductServices";
 import { motion } from "framer-motion";
+import { useAuth } from "../../app/createContextAuth/createContex";
 function TopprodectsbyFilter() {
   const SetInterval = () => {
     // Set a future date and time
@@ -91,7 +92,7 @@ function TopprodectsbyFilter() {
             opacity: 1,
             x: 0, // Slide in to its original position
             transition: {
-              duration: 2, // Animation duration
+              duration: 0.6, // Animation duration
             },
           }}
           // viewport={{ once: true }}
@@ -158,7 +159,7 @@ function TopprodectsbyFilter() {
                 opacity: 1,
                 x: 0, // Slide in to its original position
                 transition: {
-                  duration: 2, // Animation duration
+                  duration: 0.8, // Animation duration
                 },
               }}
               // viewport={{ once: true }}
@@ -176,6 +177,7 @@ function TopprodectsbyFilter() {
 export default TopprodectsbyFilter;
 
 interface ProductModelGetProduct {
+  organizationUserId: String,
   productName: string;
   rating: number;
   onSale: boolean;
@@ -183,19 +185,52 @@ interface ProductModelGetProduct {
 }
 
 const ProductComponent: React.FC = () => {
+  const [auth] = useAuth()
   const [tab, setTab] = useState("onSale");
+  const [searchQueryString] = useSearchParams();
   const [handleFilter, setHandleFilter] = useState<ProductModelGetProduct>({
+    organizationUserId: "",
     productName: "",
     rating: 0,
     onSale: true,
     featured: false,
   });
+
+  useEffect(() => {
+    if (auth._id) {
+      setHandleFilter((preValue) => ({
+        ...preValue,
+        organizationUserId: String(auth._id)
+      }));
+    }
+  }, [auth._id]);
+  const a = searchQueryString.get("q");
+  const navigate = useNavigate();
+
+  // useEffect(()=>{
+  //   setHandleFilter((preValue) => ({
+  //     ...preValue,
+  //     productName: String(a),
+  //   }));
+  // },[a])
+
+  useEffect(() => {
+    const { organizationUserId, productName, rating, onSale, featured } = handleFilter
+    if (organizationUserId && organizationUserId !== "0") {
+      if( productName || rating || onSale || featured){
+        fetchProducts();
+      }
+    }
+     
+  }, [handleFilter]);
+
   const [products, setProducts] = useState<ProductModel[]>([]);
 
   const fetchProducts = async () => {
     try {
       const response = await ProductService.getProduct({
         params: {
+          organizationUserId:handleFilter.organizationUserId,
           productName: handleFilter.productName,
           rating: handleFilter.rating,
           onSale: handleFilter.onSale,
@@ -209,22 +244,8 @@ const ProductComponent: React.FC = () => {
       setProducts([]); // Reset to an empty array on error
     }
   };
-  const [searchQueryString] = useSearchParams();
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const a = searchQueryString.get("q");
-    if (a) {
-      setHandleFilter((preValue) => ({
-        ...preValue,
-        productName: a,
-      }));
-      navigate("/");
-      fetchProducts();
-    } else {
-      fetchProducts();
-    }
-  }, [tab, handleFilter, searchQueryString.get("q")]);
+
 
   const [hoveredImageIndex, setHoveredImageIndex] = useState<
     Record<number, string>
@@ -319,7 +340,7 @@ const ProductComponent: React.FC = () => {
       <div className="d-flex flex-wrap justify-content-start algn-items-center gap-2">
         {products.length > 0 ? (
           <>
-            {products.slice(0, 5).map((product, index) => (
+            {products.slice(0, 6).map((product, index) => (
               <div key={index} className="card_cover_card py-2">
                 <div className="card_header w-100">
                   <div className="side_Images">

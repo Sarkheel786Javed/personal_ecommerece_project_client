@@ -4,13 +4,6 @@ import { Link } from "react-router-dom";
 import Products from "../Products/Products";
 import TopprodectsbyFilter from "../TopProdectsbyFilter/TopprodectsbyFilter";
 import { AuthService } from "../../Services/AuthServices/AuthServices";
-import {
-  Backdrop,
-  Box,
-  SpeedDial,
-  SpeedDialAction,
-  SpeedDialIcon,
-} from "@mui/material";
 function HomePage() {
   const [isDropdownOpen, setDropdownOpen] = useState(true);
 
@@ -69,17 +62,18 @@ function HomePage() {
       console.error("Error fetching categories:", error);
     }
   };
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const [openDepartmentCategories, setOpenDepartmentCategories] =
+    useState(false);
+  const handleOpen = () => setOpenDepartmentCategories(true);
+  const handleClose = () => setOpenDepartmentCategories(false);
   return (
     <div className="container-fluid">
       <div className="row">
         <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12">
           {/* //////////////////////////header end//////////////////////////////// */}
-          <div className="d-flex justify-content-between align-items-end">
-            <div className="d-flex justify-content-start align-items-center">
-              <div className="dropdown_button">
+          <div className="d-flex justify-content-between align-items-end ">
+            <div className="d-flex justify-content-start align-items-center position-relative">
+              <div className="dropdown_button position-relative">
                 <span
                   className="dropdown_toggle bg-warning dropdown-toggle"
                   onClick={() =>
@@ -96,22 +90,32 @@ function HomePage() {
                       isDropdownOpen === true ? "d-block" : " d-none"
                     }`}
                   >
-                    {department.map((data) => (
-                      <li className="list_department_li">
-                        <Box sx={{ transform: "translateZ(0px)", flexGrow: 1 }}>
-                          {/* {actions.map((action) => ( */}
-                          <Link to="/" className="text-decoration-none">
-                            <Backdrop open={open} />
-                            {data.userName}
-                          </Link>
-                          {/* ))} */}
-                        </Box>
+                    {department.map((data, index) => (
+                      <li
+                        key={index}
+                        className="list_department_li"
+                        onMouseEnter={handleOpen}
+                      >
+                        <Link to="/" className="text-decoration-none">
+                          {data.userName}
+                        </Link>
                       </li>
                     ))}
                   </ul>
                 </div>
               </div>
+              <div
+                className={` ${
+                  openDepartmentCategories === true
+                    ? "list_department_li_child_open"
+                    : "list_department_li_child_close"
+                }`}
+                onMouseLeave={handleClose}
+              >
+                
+              </div>
             </div>
+
             {/* <div className="w-100 d-flex justify-content-end align-items-center gap-2 ">
             <button
               className={`carousel-control-prev border border-warning rounded-3 Carousel_Active_Buttons`}

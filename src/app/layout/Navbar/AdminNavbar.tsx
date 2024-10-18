@@ -84,11 +84,11 @@ export default function PrimarySearchAppBar() {
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
-const navigate = useNavigate()
-  const HandleLogout = ()=>{
-    localStorage.removeItem("token")
-    navigate('/auth')
-  }
+  const navigate = useNavigate();
+  const HandleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/auth");
+  };
   const menuId = "primary-search-account-menu";
   const renderMenu = (
     <Menu
@@ -108,10 +108,14 @@ const navigate = useNavigate()
     >
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
       <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-      <MenuItem onClick={()=>{
-        HandleLogout();
-        handleMenuClose();
-      }}>Logout</MenuItem>
+      <MenuItem
+        onClick={() => {
+          HandleLogout();
+          handleMenuClose();
+        }}
+      >
+        Logout
+      </MenuItem>
     </Menu>
   );
 
@@ -204,7 +208,11 @@ const navigate = useNavigate()
             >
               electro.
             </Link>
-            <ToggleButton value="justify" aria-label="justified" className="mx-3">
+            <ToggleButton
+              value="justify"
+              aria-label="justified"
+              className="mx-3"
+            >
               <FormatAlignJustifyIcon />
             </ToggleButton>
           </IconButton>
