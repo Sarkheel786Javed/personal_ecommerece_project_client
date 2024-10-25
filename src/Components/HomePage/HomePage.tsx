@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import Products from "../Products/Products";
 import TopprodectsbyFilter from "../TopProdectsbyFilter/TopprodectsbyFilter";
 import { AuthService } from "../../Services/AuthServices/AuthServices";
+import { Category } from "../../Model/DepartmentProductModel/DepartmentProductModel";
+import { ProductService } from "../../Services/ProductServices/ProductServices";
 function HomePage() {
   const [isDropdownOpen, setDropdownOpen] = useState(true);
 
@@ -62,16 +64,46 @@ function HomePage() {
       console.error("Error fetching categories:", error);
     }
   };
-  const [openDepartmentCategories, setOpenDepartmentCategories] =
-    useState(false);
-  const handleOpen = () => setOpenDepartmentCategories(true);
-  const handleClose = () => setOpenDepartmentCategories(false);
+  const [openDepartmentCategories, setOpenDepartmentCategories] = useState(false);
+  const handleOpen = (departmentId: String) => {
+    if(categories.length > 0){
+      setOpenDepartmentCategories(true);
+    }
+    getAllDepartmentCategory(departmentId)
+  };
+  const handleClose = () => {
+    setOpenDepartmentCategories(false);
+    setCategories([]);
+  };
+  const [categories, setCategories] = useState<any[]>([]);
+  const getAllDepartmentCategory = async (departmentId:any) => {
+    try {
+      const date = {
+        userId: "",
+        searchString: "",
+      };
+      const response = await ProductService.getCategories(date);
+      if (response.data) {
+        const filteredCategories = response.data.filter(
+          (category:any) => String(category.userId) === String(departmentId)
+        );
+        if(filteredCategories.length > 0){
+          setCategories(filteredCategories);
+        }else{
+          setCategories([]);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
   return (
     <div className="container-fluid">
       <div className="row">
         <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12">
           {/* //////////////////////////header end//////////////////////////////// */}
-          <div className="d-flex justify-content-between align-items-end ">
+          <div className="d-flex justify-content-between align-items-end position-relative">
             <div className="d-flex justify-content-start align-items-center position-relative">
               <div className="dropdown_button position-relative">
                 <span
@@ -94,7 +126,7 @@ function HomePage() {
                       <li
                         key={index}
                         className="list_department_li"
-                        onMouseEnter={handleOpen}
+                        onClick={() => handleOpen(data._id)}
                       >
                         <Link to="/" className="text-decoration-none">
                           {data.userName}
@@ -104,42 +136,19 @@ function HomePage() {
                   </ul>
                 </div>
               </div>
-              <div
-                className={` ${
-                  openDepartmentCategories === true
-                    ? "list_department_li_child_open"
-                    : "list_department_li_child_close"
-                }`}
-                onMouseLeave={handleClose}
-              >
-                
-              </div>
             </div>
-
-            {/* <div className="w-100 d-flex justify-content-end align-items-center gap-2 ">
-            <button
-              className={`carousel-control-prev border border-warning rounded-3 Carousel_Active_Buttons`}
-              type="button"
-              data-bs-target="#carouselExampleCaptions"
-              data-bs-slide="prev"
+            <div
+              className={`  shadow ${
+                categories.length > 0 && openDepartmentCategories === true ? "fdgfdgdg p-3 d-flex  flex-wrap justify-content-start align-items-start" : "d-none"
+              }`}
+              onMouseLeave={handleClose}
             >
-              <i
-                className="bi bi-chevron-left text-warning fs-3"
-                aria-hidden="true"
-              />
-            </button>
-            <button
-              className={`carousel-control-next border border-warning rounded-3 Carousel_Active_Buttons`}
-              type="button"
-              data-bs-target="#carouselExampleCaptions"
-              data-bs-slide="next"
-            >
-              <i
-                className="bi bi-chevron-right text-warning fs-3"
-                aria-hidden="true"
-              />
-            </button>
-          </div> */}
+              {categories.map((data) => (
+                <>
+                  <div className="border border-1 border-warning m-1 p-2 rounded-3 cursor_pointer">{data.categoryName}</div>
+                </>
+              ))}
+            </div>
           </div>
 
           {/* //////////////////////////header end//////////////////////////////// */}

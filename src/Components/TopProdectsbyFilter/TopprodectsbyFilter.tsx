@@ -74,28 +74,30 @@ function TopprodectsbyFilter() {
     );
   };
   return (
-    <motion.div className="w-100 mt-5"
-    initial={{opacity: 0 , scale: 0}}
-    whileInView={{opacity: 1 , scale: 1}}
-    transition={{duration: 2}}
-    
-    // viewport={{once:true}}
+    <motion.div
+      className="w-100 mt-5"
+      // initial={{opacity: 0 , scale: 0}}
+      // whileInView={{opacity: 1 , scale: 1}}
+      // transition={{duration: 2}}
+
+      // viewport={{once:true}}
     >
       <div className="container-fluid">
         <div className="row">
-          <motion.div className="col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-4 border border-warning card_cover p-3"
-          initial={{
-            opacity: 0,
-            x: -300,
-          }}
-          whileInView={{
-            opacity: 1,
-            x: 0, // Slide in to its original position
-            transition: {
-              duration: 0.6, // Animation duration
-            },
-          }}
-          // viewport={{ once: true }}
+          <motion.div
+            className="col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-4 border border-warning card_cover p-3"
+            // initial={{
+            //   opacity: 0,
+            //   x: -300,
+            // }}
+            // whileInView={{
+            //   opacity: 1,
+            //   x: 0, // Slide in to its original position
+            //   transition: {
+            //     duration: 0.6, // Animation duration
+            //   },
+            // }}
+            // viewport={{ once: true }}
           >
             <div className=" card_header">
               <div className="">
@@ -143,30 +145,28 @@ function TopprodectsbyFilter() {
                 style={{ width: "calc(28% - 6%)" }}
               ></div>
             </div>
-            <div
-            >
+            <div>
               <div className="text-center mt-3">Hurry Up! Offer ends in:</div>
               <SetInterval />
             </div>
           </motion.div>
           <div className="col-xs-12 col-sm-12 col-md-6 col-lg-8 col-xl-8 col-xxl-8 pt-3">
             <motion.div
-              initial={{
-                opacity: 0,
-                x: 300,
-              }}
-              whileInView={{
-                opacity: 1,
-                x: 0, // Slide in to its original position
-                transition: {
-                  duration: 0.8, // Animation duration
-                },
-              }}
-              // viewport={{ once: true }}
+            // initial={{
+            //   opacity: 0,
+            //   x: 300,
+            // }}
+            // whileInView={{
+            //   opacity: 1,
+            //   x: 0, // Slide in to its original position
+            //   transition: {
+            //     duration: 0.8, // Animation duration
+            //   },
+            // }}
+            // viewport={{ once: true }}
             >
-               <ProductComponent />
+              <ProductComponent />
             </motion.div>
-           
           </div>
         </div>
       </div>
@@ -177,7 +177,7 @@ function TopprodectsbyFilter() {
 export default TopprodectsbyFilter;
 
 interface ProductModelGetProduct {
-  organizationUserId: String,
+  organizationUserId: String;
   productName: string;
   rating: number;
   onSale: boolean;
@@ -185,9 +185,9 @@ interface ProductModelGetProduct {
 }
 
 const ProductComponent: React.FC = () => {
-  const [auth] = useAuth()
+  const [auth] = useAuth();
   const [tab, setTab] = useState("onSale");
-  const [searchQueryString] = useSearchParams();
+  // const [searchQueryString] = useSearchParams();
   const [handleFilter, setHandleFilter] = useState<ProductModelGetProduct>({
     organizationUserId: "",
     productName: "",
@@ -200,12 +200,12 @@ const ProductComponent: React.FC = () => {
     if (auth._id) {
       setHandleFilter((preValue) => ({
         ...preValue,
-        organizationUserId: String(auth._id)
+        organizationUserId: String(auth._id),
       }));
     }
   }, [auth._id]);
-  const a = searchQueryString.get("q");
-  const navigate = useNavigate();
+  // const a = searchQueryString.get("q");
+  // const navigate = useNavigate();
 
   // useEffect(()=>{
   //   setHandleFilter((preValue) => ({
@@ -215,13 +215,13 @@ const ProductComponent: React.FC = () => {
   // },[a])
 
   useEffect(() => {
-    const { organizationUserId, productName, rating, onSale, featured } = handleFilter
+    const { organizationUserId, productName, rating, onSale, featured } =
+      handleFilter;
     if (organizationUserId && organizationUserId !== "0") {
-      if( productName || rating || onSale || featured){
+      if (productName || rating || onSale || featured) {
         fetchProducts();
       }
     }
-     
   }, [handleFilter]);
 
   const [products, setProducts] = useState<ProductModel[]>([]);
@@ -230,7 +230,7 @@ const ProductComponent: React.FC = () => {
     try {
       const response = await ProductService.getProduct({
         params: {
-          organizationUserId:handleFilter.organizationUserId,
+          organizationUserId: handleFilter.organizationUserId,
           productName: handleFilter.productName,
           rating: handleFilter.rating,
           onSale: handleFilter.onSale,
@@ -244,8 +244,6 @@ const ProductComponent: React.FC = () => {
       setProducts([]); // Reset to an empty array on error
     }
   };
-
-
 
   const [hoveredImageIndex, setHoveredImageIndex] = useState<
     Record<number, string>
