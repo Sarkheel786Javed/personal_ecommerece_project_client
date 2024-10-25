@@ -1,8 +1,8 @@
 import axios from "axios";
 import { ForgetModel, LoginModel, SignupModel } from "../../Model/AuthModel/AuthModel";
 
-// const baseUrl = "https://my-personal-ecommerece-project.vercel.app/api/";
-const baseUrl = "http://localhost:7000/api";
+const baseUrl = "https://my-personal-ecommerece-project.vercel.app/api/";
+// const baseUrl = "http://localhost:7000/api";
 const AuthService = {
   SignupAuth: (data: SignupModel) => {
     return axios.post(`${baseUrl}/user/register`, data);
