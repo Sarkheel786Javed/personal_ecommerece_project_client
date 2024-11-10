@@ -6,7 +6,6 @@ import CommonModal2 from "../../CommonModal2/CommonModal2";
 import { TextField } from "@mui/material";
 import {
   Category,
-  CategoryModel,
 } from "../../../Model/DepartmentProductModel/DepartmentProductModel";
 import Swal from "sweetalert2";
 
@@ -25,7 +24,7 @@ const Toast = Swal.mixin({
 function ManageProductCategory() {
   const [auth] = useAuth();
   const [productsCategoryTable, setProductsCategoryTable] = useState<
-    CategoryModel[]
+  Category[]
   >([]);
   const [searchString, setSearchString] = useState<string>("");
   const [userId, setUserId] = useState<string>("");
@@ -86,6 +85,7 @@ function ManageProductCategory() {
     _id: "0",
     categoryName: "",
     organization: "",
+    totalCategories:0
   };
   const [editValues, setEditValue] = useState<Category>(initialValues);
   const handleClose = () => {
@@ -208,7 +208,6 @@ export const AddProductCategory = (props: any) => {
     const data = {
       categoryId: props.editValues._id !== "0" ? props.editValues._id : props.editValues._id,
       categoryName: category,
-      userId: auth._id,
     };
   
     if (category.trim() === "") {

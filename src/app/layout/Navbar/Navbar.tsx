@@ -298,6 +298,9 @@ function Navbar() {
                     >
                       Logout
                     </MenuItem>
+                    {auth.Organization === "User" && (
+                      <MenuItem>Settings</MenuItem>
+                    )}
                   </Menu>
                 </div>
               ) : (

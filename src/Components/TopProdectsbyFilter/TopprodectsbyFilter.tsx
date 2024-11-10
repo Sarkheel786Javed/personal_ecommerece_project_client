@@ -6,6 +6,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ProductService } from "../../Services/ProductServices/ProductServices";
 import { motion } from "framer-motion";
 import { useAuth } from "../../app/createContextAuth/createContex";
+import { useDispatch } from "react-redux";
+import { AddProduct } from "../StoreSlice/SliceProductViewDetails";
 function TopprodectsbyFilter() {
   const SetInterval = () => {
     // Set a future date and time
@@ -185,6 +187,7 @@ interface ProductModelGetProduct {
 }
 
 const ProductComponent: React.FC = () => {
+  const navigate = useNavigate()
   const [auth] = useAuth();
   const [tab, setTab] = useState("onSale");
   // const [searchQueryString] = useSearchParams();
@@ -255,6 +258,12 @@ const ProductComponent: React.FC = () => {
       [index]: img,
     }));
   };
+  ////////////////////redux////////////////////////
+const dispatch = useDispatch()
+  const HandleProductDetail = (product:ProductModel) =>{
+    dispatch(AddProduct(product))
+    navigate('/view-product-details')
+  }
   return (
     <div className="w-100">
       <div className="d-flex justify-content-start align-items-center border-bottom w-100">
@@ -392,7 +401,8 @@ const ProductComponent: React.FC = () => {
                         ${product.price - product.discount}
                       </div>
                     </div>
-                    <div className="bi bi-cart3 bg-warning text-danger  buy_product" />
+                    <div className="bi bi-cart3 bg-warning text-danger buy_product" 
+                    onClick={()=> HandleProductDetail(product)}/>
                   </div>
                 </div>
                 <div className="card_footer"></div>

@@ -7,23 +7,29 @@ import {
   CDBSidebarMenuItem,
 } from "cdbreact";
 import { Link } from "react-router-dom";
-import './Sidebar.scss'
+import "./Sidebar.scss";
 // import { DataSide } from "./SidebarItems/SideBarItems";
 import { useAuth } from "../../createContextAuth/createContex";
 import { sidebarAuth } from "../../createContextAuth/CreateSidebarContext";
 
 const SideBarItems = () => {
   const [auth] = useAuth();
-  const [sidebarOpen]= sidebarAuth()
+  const [sidebarOpen] = sidebarAuth();
 
   return (
     <div>
       {auth.Organization === "User" ? (
         <>
-          <Link to="/" className={`border border-light text-light ${location.pathname === "/" ? "activeClicked" : ""}`}
+          <Link
+            to="/"
+            className={`border border-light text-light ${
+              location.pathname === "/" ? "activeClicked" : ""
+            }`}
           >
             <CDBSidebarMenuItem
-              className={`border border-light text-light mx-1 rounded-2 ${sidebarOpen.open === "75px" ? "mx-0" : "mx-2"} my-2 shadow`}
+              className={`border border-light text-light mx-1 rounded-2 ${
+                sidebarOpen.open === "75px" ? "mx-0" : "mx-2"
+              } my-2 shadow`}
               icon="bi bi-menu-button-wide "
               active={location.pathname === "/auth/dashboard" ? true : false}
             >
@@ -33,87 +39,136 @@ const SideBarItems = () => {
         </>
       ) : auth.Organization === "Admin" ? (
         <>
-          <Link to="/auth/dashboard" className={`border border-light text-light ${location.pathname === "/auth/dashboard" ? "activeClicked" : ""}`}
+          {/* user_request_for_department */}
+          <Link
+            to="/auth/dashboard"
+            className={
+              location.pathname === "/auth/dashboard" ? "activeClicked" : ""
+            }
           >
             <CDBSidebarMenuItem
-              className={`border border-light text-light mx-1 rounded-2 ${sidebarOpen.open === "75px" ? "mx-0" : "mx-2"} my-2 shadow`}
+              className={`border border-light text-light mx-1 rounded-2 ${
+                sidebarOpen.open === "75px" ? "mx-0" : "mx-2"
+              } my-2 shadow`}
               icon="bi bi-menu-button-wide "
               active={location.pathname === "/auth/dashboard" ? true : false}
             >
-              Admin Dashboard
+              Dashboard
             </CDBSidebarMenuItem>
           </Link>
-          <Link to="/auth/dashboard" className={location.pathname === "/auth/dashboard" ? "activeClicked" : ""}
+          <Link
+            to="/auth/user_request_for_department"
+            className={
+              location.pathname === "/auth/user_request_for_department"
+                ? "activeClicked"
+                : ""
+            }
           >
             <CDBSidebarMenuItem
-              className={`border border-light text-light mx-1 rounded-2 ${sidebarOpen.open === "75px" ? "mx-0" : "mx-2"} my-2 shadow`}
+              className={`border border-light text-light mx-1 rounded-2 ${
+                sidebarOpen.open === "75px" ? "mx-0" : "mx-2"
+              } my-2 shadow`}
+              icon="bi bi-menu-button-wide "
+              active={
+                location.pathname === "/auth/user_request_for_department"
+                  ? true
+                  : false
+              }
+            >
+              Departments Request
+            </CDBSidebarMenuItem>
+          </Link>
+          <Link
+            to="/auth/dashboard"
+            className={
+              location.pathname === "/auth/dashboard" ? "activeClicked" : ""
+            }
+          >
+            <CDBSidebarMenuItem
+              className={`border border-light text-light mx-1 rounded-2 ${
+                sidebarOpen.open === "75px" ? "mx-0" : "mx-2"
+              } my-2 shadow`}
               icon="bi bi-menu-button-wide "
               active={location.pathname === "/auth/dashboard" ? true : false}
             >
               Collections
             </CDBSidebarMenuItem>
           </Link>
-          <Link to="/auth/dashboard" className={location.pathname === "/auth/dashboard" ? "activeClicked" : ""}
+          <Link
+            to="/auth/dashboard"
+            className={
+              location.pathname === "/auth/dashboard" ? "activeClicked" : ""
+            }
           >
             <CDBSidebarMenuItem
-              className={`border border-light text-light mx-1 rounded-2 ${sidebarOpen.open === "75px" ? "mx-0" : "mx-2"} my-2 shadow`}
+              className={`border border-light text-light mx-1 rounded-2 ${
+                sidebarOpen.open === "75px" ? "mx-0" : "mx-2"
+              } my-2 shadow`}
               icon="bi bi-menu-button-wide "
               active={location.pathname === "/auth/dashboard" ? true : false}
             >
               Analytics
             </CDBSidebarMenuItem>
           </Link>
-          <Link to="/auth/dashboard" className={location.pathname === "/auth/dashboard" ? "activeClicked" : ""}
-          >
-            <CDBSidebarMenuItem
-              className={`border border-light text-light mx-1 rounded-2 ${sidebarOpen.open === "75px" ? "mx-0" : "mx-2"} my-2 shadow`}
-              icon="bi bi-menu-button-wide "
-              active={location.pathname === "/auth/dashboard" ? true : false}
-            >
-              Admin Dashboard
-            </CDBSidebarMenuItem>
-          </Link>
-          <Link to="/auth/dashboard" className={location.pathname === "/auth/dashboard" ? "activeClicked" : ""}
-          >
-            <CDBSidebarMenuItem
-              className={`border border-light text-light mx-1 rounded-2 ${sidebarOpen.open === "75px" ? "mx-0" : "mx-2"} my-2 shadow`}
-              icon="bi bi-menu-button-wide "
-              active={location.pathname === "/auth/dashboard" ? true : false}
-            >
-              Admin Dashboard
-            </CDBSidebarMenuItem>
-          </Link>
         </>
       ) : auth.Organization === "Department" ? (
         <>
-          <Link to="/auth/dashboard" className={location.pathname === "/auth/dashboard" ? "activeClicked" : ""}
+          <Link
+            to="/auth/dashboard"
+            className={
+              location.pathname === "/auth/dashboard" ? "activeClicked" : ""
+            }
           >
             <CDBSidebarMenuItem
-              className={`border border-light text-light mx-1 rounded-2 ${sidebarOpen.open === "75px" ? "mx-0" : "mx-2"} my-2 shadow`}
+              className={`border border-light text-light mx-1 rounded-2 ${
+                sidebarOpen.open === "75px" ? "mx-0" : "mx-2"
+              } my-2 shadow`}
               icon="bi bi-menu-button-wide "
               active={location.pathname === "/auth/dashboard" ? true : false}
             >
               Department Dashboard
             </CDBSidebarMenuItem>
           </Link>
-          <Link to="/auth/manage-product" className={location.pathname === "/auth/manage-product" ? "activeClicked" : ""}
+          <Link
+            to="/auth/manage-product"
+            className={
+              location.pathname === "/auth/manage-product"
+                ? "activeClicked"
+                : ""
+            }
           >
             <CDBSidebarMenuItem
-              className={`border border-light text-light mx-1 rounded-2 ${sidebarOpen.open === "75px" ? "mx-0" : "mx-2"} my-2 shadow`}
+              className={`border border-light text-light mx-1 rounded-2 ${
+                sidebarOpen.open === "75px" ? "mx-0" : "mx-2"
+              } my-2 shadow`}
               icon="bi bi-menu-button-wide "
-              active={location.pathname === "/auth/manage-product" ? true : false}
+              active={
+                location.pathname === "/auth/manage-product" ? true : false
+              }
             >
               Manage Products
             </CDBSidebarMenuItem>
           </Link>
-          <Link to="/auth/manage-product-category" className={location.pathname === "/auth/manage-product-category" ? "activeClicked" : ""}
+          <Link
+            to="/auth/manage-product-category"
+            className={
+              location.pathname === "/auth/manage-product-category"
+                ? "activeClicked"
+                : ""
+            }
           >
             <CDBSidebarMenuItem
-              className={`border border-light text-light mx-1 rounded-2 ${sidebarOpen.open === "75px" ? "mx-0" : "mx-2"} my-2 shadow`}
+              className={`border border-light text-light mx-1 rounded-2 ${
+                sidebarOpen.open === "75px" ? "mx-0" : "mx-2"
+              } my-2 shadow`}
               icon="bi bi-menu-button-wide "
-              active={location.pathname === "/auth/manage-product-category" ? true : false}
+              active={
+                location.pathname === "/auth/manage-product-category"
+                  ? true
+                  : false
+              }
             >
-              Manage Products
+              Manage Products Category
             </CDBSidebarMenuItem>
           </Link>
         </>
@@ -124,12 +179,12 @@ const SideBarItems = () => {
   );
 };
 const Sidebar = () => {
-  const [sidebarOpen]= sidebarAuth()
+  const [sidebarOpen] = sidebarAuth();
 
   return (
     <div
       style={{
-        borderTop:"1px solid lightgrey",
+        borderTop: "1px solid lightgrey",
         display: "flex",
         minHeight: "100vh",
         overflow: "scroll initial",
@@ -137,15 +192,13 @@ const Sidebar = () => {
     >
       <CDBSidebar
         className="my-sidebar"
-        textColor="white" 
+        textColor="white"
         backgroundColor="#1976d2"
         breakpoint={768}
         toggled={false}
-        minWidth={sidebarOpen.open === "250px" ? "70px": "250px"}
-        maxWidth={sidebarOpen.open === "75px" ? "250px": "70px" }
-        
+        minWidth={sidebarOpen.open === "250px" ? "70px" : "250px"}
+        maxWidth={sidebarOpen.open === "75px" ? "250px" : "70px"}
       >
-        
         <CDBSidebarContent className="sidebar-content ">
           <CDBSidebarMenu className="p-0">{SideBarItems()}</CDBSidebarMenu>
         </CDBSidebarContent>

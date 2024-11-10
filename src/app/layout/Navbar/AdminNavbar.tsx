@@ -18,6 +18,7 @@ import MoreIcon from "@mui/icons-material/MoreVert";
 import { sidebarAuth } from "../../createContextAuth/CreateSidebarContext";
 import { ToggleButton } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../createContextAuth/createContex";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -60,6 +61,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function PrimarySearchAppBar() {
+  const [Auth] = useAuth()
   const [sidebarOpen, setIsSidebaropen] = sidebarAuth();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
@@ -189,6 +191,7 @@ export default function PrimarySearchAppBar() {
       setIsSidebaropen({ open: "250px" });
     }
   };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" color="primary" enableColorOnDark>
@@ -233,6 +236,13 @@ export default function PrimarySearchAppBar() {
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
+           <Box>
+            {Auth && (
+              <>
+              {Auth.userName}
+              </>
+            )}
+          </Box>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <IconButton
@@ -265,6 +275,7 @@ export default function PrimarySearchAppBar() {
               <AccountCircle />
             </IconButton>
           </Box>
+         
           <Box sx={{ display: { xs: "flex", md: "none" } }}>
             <IconButton
               size="large"

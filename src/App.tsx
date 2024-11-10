@@ -1,15 +1,17 @@
 // import React from 'react';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./Components/Login/Login";
-import SignUp from "./Components/Login/SignUp.js";
-import ForgetPassword from "./Components/Login/ForgetPassword.js";
-import Layout from "./app/layout/Layout.js";
-import HomePage from "./Components/HomePage/HomePage.js";
-import Authorization from "./app/Auth/Auth.js";
-import PrivateRoutes from "./app/PrivateRoutes/DashboardWrapper.js";
-import Dashboard from "./Components/Dashboard/Dashboard.js";
-import ManageProduct from './Components/departmentManagement/ManageProduct/ManageProduct.js'
-import ManageProductCategory from "./Components/departmentManagement/ManageProductCategory/ManageProductCategory.js";
+import SignUp from "./Components/Login/SignUp";
+import ForgetPassword from "./Components/Login/ForgetPassword";
+import Layout from "./app/layout/Layout";
+import HomePage from "./Components/HomePage/HomePage";
+import ProductViewDetail from "./Components/ProductViewDetail/ProductViewDetail";
+import Authorization from "./app/Auth/Auth";
+import PrivateRoutes from "./app/PrivateRoutes/DashboardWrapper";
+import Dashboard from "./Components/Dashboard/Dashboard";
+import ManageProduct from './Components/departmentManagement/ManageProduct/ManageProduct';
+import AdminApprovedDpartmentRequest from './Components/AdminApprovedDpartmentRequest/AdminApprovedDpartmentRequest';
+import ManageProductCategory from "./Components/departmentManagement/ManageProductCategory/ManageProductCategory";
 function App() {
   return (
     <BrowserRouter>
@@ -19,6 +21,14 @@ function App() {
           element={
             <Layout>
               <HomePage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/view-product-details"
+          element={
+            <Layout>
+              <ProductViewDetail />
             </Layout>
           }
         />
@@ -49,6 +59,7 @@ function App() {
         <Route path="/auth" element={ <Authorization><PrivateRoutes /></Authorization>}>
           <Route path="dashboard" element={<Dashboard />}/>
           <Route path="manage-product" element={<ManageProduct />}/>
+          <Route path="user_request_for_department" element={<AdminApprovedDpartmentRequest />}/>
           <Route path="manage-product-category" element={<ManageProductCategory />}/>
         </Route>
       </Routes>
