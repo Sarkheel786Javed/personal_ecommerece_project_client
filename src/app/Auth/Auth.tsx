@@ -14,7 +14,7 @@ interface AuthTokenProviderProps {
 
 const AuthTokenProvider: React.FC<AuthTokenProviderProps> = ({ children }) => {
   const [isTokenValid, setIsTokenValid] = useState<boolean>(true);
-  const navigate = useNavigate();
+  const navigate =  useNavigate();
 
   useEffect(() => {
     debugger;

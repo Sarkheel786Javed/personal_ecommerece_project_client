@@ -74,7 +74,7 @@ function BasicTable() {
             icon: "success",
             title: response.data.message,
           });
-        }else{
+        } else {
           Toast.fire({
             icon: "error",
             title: response.data.message,
@@ -92,7 +92,10 @@ function BasicTable() {
   return (
     <>
       <TableContainer component={Paper}>
-        <Table sx={{ width: "100%" , maxHeight: "calc(100vh - 80px)" }} aria-label="simple table">
+        <Table
+          sx={{ width: "100%", maxHeight: "calc(100vh - 80px)" }}
+          aria-label="simple table"
+        >
           <TableHead>
             <TableRow>
               <TableCell>_id</TableCell>
